@@ -30,7 +30,7 @@ neon_citation("DP1.10003.001")      # Cites the specific data product used
 
 
 # Set up a NEON data directory  ### This might be the hardest part for people to understand
-# "C:\\Users\\Owner\\AppData\\Local\\neonstore\\neonstore"##!!! is there a list of the different conditions? tempdir(), etc.?
+# "C:\\Users\\Owner\\AppData\\Local\\neonstore\\neonstore"##!!! is there a list of the different directories tempdir(), etc.?
 # -------------------------------------------------------------------
 
 Sys.unsetenv("NEONSTORE_HOME")
@@ -39,12 +39,14 @@ neon_dir()
 # -------------------------------------------------------------------
 
 # Download NEON data product into the local neon_dir()
-# Relative Humidity
+# Primary meteorological data needed to run GLM includes Shortwave, Longwave, Airtemp, Relative Humidity, 
+# Windspeed, Rain, and Snow
 
+# Relative Humidity
 neon_download(
   "DP1.00098.001",
-  start_date = "2018-01-01",
-  end_date = "2019-01-01",
+  start_date = "2013-01-01",
+  end_date = "2020-08-01",
   site = c("BARC","CRAM","PRLA", "PRPO", "SUGG", "TOOK"),
   type = "expanded",
   file_regex = "[.]csv",
@@ -56,5 +58,16 @@ neon_download(
   .token = Sys.getenv("NEON_TOKEN")
 )
 
-info <- neon_index("DP1.00098.001")
-
+rel_hum_dat <- neon_read(
+  table = "RH_30min-expanded",
+  product = "DP1.00098.001",
+  site = c("BARC","CRAM","PRLA", "PRPO", "SUGG", "TOOK"),
+  start_date = "2018-01-01",
+  end_date = "2019-01-01",
+  ext = "csv",
+  timestamp = NA,
+  dir = neon_dir(),
+  files = NULL,
+  sensor_metadata = TRUE,
+  altrep = FALSE
+)
