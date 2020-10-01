@@ -39,10 +39,7 @@ neon_dir()
 # -------------------------------------------------------------------
 
 # This  code will aggregate the data to hourly. ---------------------
-# mutate(DateTime = lubridate::floor_date(startDateTime, unit = "hour"))%>%
-# select(-startDateTime)%>%
-# group_by(DateTime) %>%
-# summarize_all(funs(mean))
+
 # -------------------------------------------------------------------
 
 
@@ -143,7 +140,7 @@ neon_download(
 
 # Extract the downloaded data and prepare it as a dataframe for GLM-AED. 
 # -------------------------------------------------------------------
-
+# Humidity
 rel_hum_dat <- neon_read(
   table = "RH_30min-expanded",
   product = "DP1.00098.001",
@@ -158,6 +155,7 @@ rel_hum_dat <- neon_read(
   altrep = FALSE
 ) %>% select(startDateTime, Month, RHMean, siteID)
 
+# AirTemp
 air_temp_dat <- neon_read(
   table = "SAAT_30min-expanded",
   product = "DP1.00002.001",
@@ -172,6 +170,7 @@ air_temp_dat <- neon_read(
   altrep = FALSE
 ) %>% select(startDateTime, Month, tempSingleMean, siteID)
 
+#SW LW Radiation
 radiation_dat <- neon_read(
   table = "SLRNR_30min-expanded",
   product = "DP1.00023.001",
@@ -189,6 +188,7 @@ radiation_dat <- neon_read(
   mutate(LWMean = inLWMean - outLWMean)%>%
   select(startDateTime, SWMean, LWMean, siteID)
 
+# WindSpeed
 wind_speed_dat <- neon_read(
   table = "2DWSD_30min-expanded",
   product = "DP1.00001.001",
@@ -203,6 +203,7 @@ wind_speed_dat <- neon_read(
   altrep = FALSE
 ) %>% select(startDateTime, windSpeedMean, siteID)
 
+# Precipitation
 precip_dat <- neon_read(
   table = "SECPRE_30min-expanded",
   product = "DP1.00006.001",
@@ -236,6 +237,14 @@ NEON_lake_met <- left_join(radiation_dat, air_temp_dat, by=c('startDateTime','si
   arrange(startDateTime)
 # -------------------------------------------------------------------
 
+CRAM_met <- NEON_lake_met %>% filter(siteID == "CRAM") %>%
+  select(startDateTime, SWMean, LWMean, tempSingleMean, RHMean, windSpeedMean, secPrecipBulk)%>%
+  mutate(time = lubridate::floor_date(startDateTime, unit = "hour"))%>%
+  mutate(Snow = ifelse(tempSingleMean <= 0, secPrecipBulk, 0))%>%
+  select(-startDateTime)%>%
+  group_by(time) %>%
+  summarize_all(funs(mean))%>%
+  rename(ShortWave = SWMean, LongWave = LWMean, AirTemp = tempSingleMean, RelHum = RHMean, WindSpeed = windSpeedMean, Rain = secPrecipBulk)
 
 # Make a Heatmap plot of the different met data
 # -------------------------------------------------------------------
