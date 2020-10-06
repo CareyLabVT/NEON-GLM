@@ -477,7 +477,6 @@ NEON_lake_met <- left_join(radiation_dat, air_temp_dat, by=c('startDateTime','si
   mutate(year_month = format(as.Date(startDateTime, "%Y-%m-%d"), "%Y-%m"))%>%
   arrange(startDateTime)
 
-
 # -------------------------------------------------------------------
 # Explore hourly Time series meteorological data
 # -------------------------------------------------------------------
