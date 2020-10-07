@@ -369,8 +369,8 @@ precip_dat <- neon_read(
   dir = neon_dir(),
   files = NULL,
   sensor_metadata = TRUE,
-  altrep = FALSE
-) %>% select(startDateTime, secPrecipBulk, siteID)
+  altrep = FALSE)%>% 
+  select(startDateTime, secPrecipBulk, siteID)
 
 # Change precip names to match the actual lake siteID identifier.
 # Additionally, BARC and SUGGS and PRPO and PRLA met data can be interoperable.
