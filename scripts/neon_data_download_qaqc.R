@@ -13,7 +13,7 @@
 # -------------------------------------------------------------------
 
 if (!require('pacman')) install.packages('pacman'); library('pacman')
-pacman::p_load(tidyverse, neonstore, lubridate, reshape2,devtools)
+pacman::p_load(tidyverse, lubridate, reshape2,devtools)
 
 # -------------------------------------------------------------------
 # Download NEON data products into the local neon_dir()
@@ -298,7 +298,7 @@ manual_collection <- bind_rows(air_ghg,
 rel_hum_dat <- neon_read(
   table = "RH_30min-expanded",
   product = "DP1.00098.001",
-  site = c("BARC","CRAM","PRLA", "PRPO", "SUGG", "TOOK"),
+  site = c("BARC","CRAM","PRLA", "PRPO", "SUGG", "TOOK", "OSBS"),
   start_date = "2013-01-01",
   end_date = "2020-08-01",
   ext = "csv",
@@ -309,11 +309,11 @@ rel_hum_dat <- neon_read(
   altrep = FALSE
 ) %>% select(startDateTime, RHMean, siteID)
 
-# AirTemp
-air_temp_dat <- neon_read(
-  table = "SAAT_30min-expanded",
-  product = "DP1.00002.001",
-  site = c("BARC","CRAM","PRLA", "PRPO", "SUGG", "TOOK"),
+# Humidity
+rel_hum_dat_OSBS <- neon_read(
+  table = "RH_30min-expanded",
+  product = "DP1.00098.001",
+  site = c("OSBS"),
   start_date = "2013-01-01",
   end_date = "2020-08-01",
   ext = "csv",
@@ -322,8 +322,79 @@ air_temp_dat <- neon_read(
   files = NULL,
   sensor_metadata = TRUE,
   altrep = FALSE
-) %>% select(startDateTime, tempSingleMean, siteID)
+) %>% select(startDateTime, RHMean, siteID)
 
+rel_hum_dat_BARC <- rel_hum_dat %>% filter(siteID == "BARC")
+rel_hum_dat_SUGG <- rel_hum_dat %>% filter(siteID == "SUGG")
+
+hum_compare <- left_join(rel_hum_dat_BARC, rel_hum_dat_SUGG, by=c('startDateTime')) %>%
+  left_join(., rel_hum_dat_OSBS, by=c('startDateTime'))%>%
+  arrange(startDateTime)%>%
+  rename(RHMean_barc = RHMean.x, RHMean_sugg = RHMean.y, RHMean_osbs = RHMean)
+
+pdf("./figures/barc_osbs_humidity_compare.pdf", width = 20, height = 20)
+ggplot(hum_compare, aes(RHMean_osbs, RHMean_barc))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("OSBS vs BARC Humidity")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+dev.off() 
+
+pdf("./figures/sugg_osbs_humidity_compare.pdf", width = 20, height = 20)
+ggplot(hum_compare, aes(RHMean_osbs, RHMean_sugg))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("OSBS vs BSUGG Humidity")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+dev.off() 
+
+# AirTemp
+air_temp_dat_OSBS <- neon_read(
+  table = "SAAT_30min-expanded",
+  product = "DP1.00002.001",
+  site = c("OSBS"),
+  start_date = "2013-01-01",
+  end_date = "2020-08-01",
+  ext = "csv",
+  timestamp = NA,
+  dir = neon_dir(),
+  files = NULL,
+  sensor_metadata = TRUE,
+  altrep = FALSE
+) %>% select(startDateTime, tempSingleMean, siteID) %>%
+  group_by(startDateTime)%>%summarize_all(funs(mean(., na.rm = TRUE)))
+
+air_temp_dat_BARC <- air_temp_dat %>% filter(siteID == "BARC")
+air_temp_dat_SUGG <- air_temp_dat %>% filter(siteID == "SUGG")
+
+temp_compare <- left_join(air_temp_dat_BARC, air_temp_dat_SUGG, by=c('startDateTime')) %>%
+  left_join(., air_temp_dat_OSBS, by=c('startDateTime'))%>%
+  arrange(startDateTime)%>%
+  rename(air_temp_barc = tempSingleMean.x, air_temp_sugg = tempSingleMean.y, air_temp_osbs = tempSingleMean)
+
+pdf("./figures/barc_osbs_airtemp_compare.pdf", width = 20, height = 20)
+ggplot(temp_compare, aes(air_temp_osbs, air_temp_barc))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("OSBS vs BARC AirTemp")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+dev.off() 
+
+pdf("./figures/sugg_osbs_airtemp_compare.pdf", width = 20, height = 20)
+ggplot(temp_compare, aes(air_temp_osbs, air_temp_sugg))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("OSBS vs SUGG AirTemp")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+dev.off() 
 #SW LW Radiation
 radiation_dat <- neon_read(
   table = "SLRNR_30min-expanded",
