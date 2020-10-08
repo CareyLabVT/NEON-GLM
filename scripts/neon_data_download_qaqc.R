@@ -13,7 +13,7 @@
 # -------------------------------------------------------------------
 
 if (!require('pacman')) install.packages('pacman'); library('pacman')
-pacman::p_load(tidyverse, neonstore, lubridate, reshape2)
+pacman::p_load(tidyverse, neonstore, lubridate, reshape2,devtools)
 
 # -------------------------------------------------------------------
 # Download NEON data products into the local neon_dir()
@@ -60,9 +60,9 @@ lapply(water_var_product, neon_download, site = site,
 # Bathymetry = DP4.00132.001
 
 met_product = c("DP1.00098.001", "DP1.00002.001", "DP1.00023.001",
-                "DP1.00006.001", "DP1.00001.001", "DP4.00132.001")
+                "DP1.00006.001", "DP1.00001.001")
 
-site = site
+site = "OSBS"
 
 lapply(met_product, neon_download, site = site, 
        start_date = "2013-01-01", end_date = "2020-10-01",
@@ -599,3 +599,5 @@ TOOK_met_ts <- melt(TOOK_met, id=c("time"))%>%
 pdf("./figures/took_met_time_series.pdf", width = 20, height = 12)
 TOOK_met_ts
 dev.off() 
+
+
