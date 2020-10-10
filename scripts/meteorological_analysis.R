@@ -15,13 +15,20 @@ pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork)
 # Bypass the latest CRAN version of neonstore and use Carl's most recent Github push
 devtools::install_github("cboettig/neonstore")
 
-sites = c("TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM", "OSBS", "TOOL", "DCFS", "UNDE")
+lake_sites = c("TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
+tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE")
 
 # Humidity
 met_product_hum = "DP1.00098.001"
-lapply(met_product_hum, neonstore::neon_download, site = sites, 
-       start_date = "2013-01-01", end_date = NA,
+lapply(met_product_hum, neonstore::neon_download, site = lake_sites, 
+       start_date = "2013-01-01", end_date = "2020-10-01",
        file_regex = "[.]csv")
+neonstore::neon_store(table = "RH_1min-expanded")
+rel_hum_dat <- neonstore::neon_table(table = "RH_1min-expanded", site = lake_sites) %>%
+  select(endDateTime, RHMean, siteID)
+filter(endDateTime >= hms::as.hms('16:59:00'),
+       endDateTime <= hms::as.hms('17:01:00'),)
+
 
 # Air Temperature
 met_product_airT = "DP1.00002.001"
@@ -49,6 +56,18 @@ lapply(met_product_wind, neonstore::neon_download, site = sites,
 
 
 
+
+
+
+
+NEON_lake_met <- left_join(radiation_dat, air_temp_dat, by=c('startDateTime','siteID')) %>%
+  left_join(., wind_speed_dat, by=c('startDateTime','siteID'))%>%
+  left_join(., precip_dat, by=c('startDateTime','siteID'))%>%
+  left_join(., rel_hum_dat, by=c('startDateTime','siteID'))%>%
+  select(startDateTime,siteID,SWMean,LWMean,tempSingleMean,windSpeedMean,secPrecipBulk,RHMean)%>%
+  mutate(year_month = format(as.Date(startDateTime, "%Y-%m-%d"), "%Y-%m"))%>%
+  arrange(startDateTime)
+
 # Humidity
 # -------------------------------------------------------------------
 rel_hum_dat <- neonstore::neon_read(
@@ -64,6 +83,12 @@ rel_hum_dat <- neonstore::neon_read(
   altrep = FALSE
 ) %>% select(endDateTime, RHMean, verticalPosition, siteID)
 
+neonstore::neon_store(table = "SLRNR_30min-expanded")
+radiation_dat <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = sites) %>%
+  select(endDateTime, inSWMean, outSWMean, inLWMean, outLWMean,verticalPosition, siteID)%>%
+  mutate(SWMean = inSWMean - outSWMean)%>%
+  mutate(LWMean = inLWMean - outLWMean)%>%
+  select(endDateTime, SWMean, LWMean, verticalPosition, siteID)
 # Lake hum
 rel_hum_dat_BARC <- rel_hum_dat %>% filter(siteID == "BARC") %>% filter(verticalPosition == "000") %>% select(-verticalPosition, -siteID)
 rel_hum_dat_SUGG <- rel_hum_dat %>% filter(siteID == "SUGG") %>% filter(verticalPosition == "000") %>% select(-verticalPosition, -siteID)
@@ -327,17 +352,8 @@ dev.off()
 
 # Shortwave and Longwave Radiation
 # -------------------------------------------------------------------
-radiation_dat <- neonstore::neon_read(
-  table = "SLRNR_30min-expanded",
-  product = "DP1.00023.001",
-  site = NA,
-  start_date = "2013-01-01",
-  end_date = NA,
-  ext = "csv",
-  timestamp = NA,
-  files = NULL,
-  sensor_metadata = TRUE,
-  altrep = FALSE)%>%
+neonstore::neon_store(table = "SLRNR_30min-expanded")
+radiation_dat <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = sites) %>%
   select(endDateTime, inSWMean, outSWMean, inLWMean, outLWMean,verticalPosition, siteID)%>%
   mutate(SWMean = inSWMean - outSWMean)%>%
   mutate(LWMean = inLWMean - outLWMean)%>%
@@ -356,5 +372,162 @@ sw_lw_dat_OSBS <- radiation_dat %>% filter(siteID == "OSBS") %>% filter(vertical
 sw_lw_dat_TOOL <- radiation_dat %>% filter(siteID == "TOOL") %>% filter(verticalPosition == "000") %>% select(-verticalPosition, -siteID)
 sw_lw_dat_DCFS <- radiation_dat %>% filter(siteID == "DCFS") %>% filter(verticalPosition == "000") %>% select(-verticalPosition, -siteID)
 sw_lw_dat_UNDE <- radiation_dat %>% filter(siteID == "UNDE") %>% filter(verticalPosition == "060") %>% select(-verticalPosition, -siteID)
+
+sw_lw_compare_unde <- left_join(sw_lw_dat_UNDE, sw_lw_dat_CRAM, by=c('endDateTime')) %>%
+  arrange(endDateTime)%>%
+  rename(SWMean_UNDE = SWMean.x, LWMean_UNDE = LWMean.x, SWMean_CRAM = SWMean.y, LWMean_CRAM = LWMean.y)
+
+sw_lw_compare_tool <- left_join(sw_lw_dat_TOOL, sw_lw_dat_TOOK, by=c('endDateTime')) %>%
+  arrange(endDateTime) %>%
+  rename(SWMean_TOOL = SWMean.x, LWMean_TOOL = LWMean.x, SWMean_TOOK = SWMean.y, LWMean_TOOK = LWMean.y)
+
+sw_lw_compare_osbs <- left_join(sw_lw_dat_OSBS, sw_lw_dat_SUGG, by=c('endDateTime')) %>%
+  left_join(., sw_lw_dat_BARC, by=c('endDateTime'))%>%
+  arrange(endDateTime)%>%
+  rename(SWMean_OSBS = SWMean.x, LWMean_OSBS = LWMean.x, SWMean_SUGG = SWMean.y, LWMean_SUGG = LWMean.y,SWMean_BARC = SWMean, LWMean_BARC = LWMean)
+
+sw_lw_compare_dcfs <- left_join(sw_lw_dat_DCFS, sw_lw_dat_PRPO, by=c('endDateTime')) %>%
+  left_join(., sw_lw_dat_PRLA, by=c('endDateTime'))%>%
+  arrange(endDateTime)%>%
+  rename(SWMean_DCFS = SWMean.x, LWMean_DCFS = LWMean.x, SWMean_PRPO = SWMean.y, LWMean_PRPO = LWMean.y,SWMean_PRLA = SWMean, LWMean_PRLA = LWMean)
+
+
+pdf("./figures/took_tool_radiation_compare.pdf", width = 40, height = 20)
+a <- ggplot(sw_lw_compare_tool, aes(SWMean_TOOL, SWMean_TOOK))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("TOOL vs TOOK SW")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+b <- ggplot(sw_lw_compare_tool, aes(endDateTime,SWMean_TOOL))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,SWMean_TOOK), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+c <- ggplot(sw_lw_compare_tool, aes(LWMean_TOOL, LWMean_TOOK))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("TOOL vs TOOK LW")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+d <- ggplot(sw_lw_compare_tool, aes(endDateTime,LWMean_TOOL))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,LWMean_TOOK), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+e = (a+b)/(c+d)
+e
+dev.off() 
+
+pdf("./figures/unde_cram_radiation_compare.pdf", width = 40, height = 20)
+a <- ggplot(sw_lw_compare_unde, aes(SWMean_UNDE, SWMean_CRAM))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("UNDE vs CRAM SW")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+b <- ggplot(sw_lw_compare_unde, aes(endDateTime,SWMean_CRAM))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,SWMean_CRAM), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+c <- ggplot(sw_lw_compare_unde, aes(LWMean_UNDE, LWMean_CRAM))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("UNDE vs CRAM LW")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+d <- ggplot(sw_lw_compare_unde, aes(endDateTime,LWMean_UNDE))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,LWMean_CRAM), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+e = (a+b)/(c+d)
+e
+dev.off()  
+
+pdf("./figures/barc_osbs_airtemp_compare.pdf", width = 40, height = 20)
+a <- ggplot(temp_compare_osbs, aes(tempSingleMean_OSBS, tempSingleMean_BARC))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("OSBS vs BARC Air Temp")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+
+b <- ggplot(temp_compare_osbs, aes(endDateTime,tempSingleMean_OSBS))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,tempSingleMean_BARC), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+c = a+b
+c
+dev.off() 
+
+pdf("./figures/cram_unde_airtemp_compare.pdf", width = 40, height = 20)
+a <- ggplot(temp_compare_unde, aes(tempSingleMean_UNDE, tempSingleMean_CRAM))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("UNDE vs CRAM Air Temp")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+
+b <- ggplot(temp_compare_unde, aes(endDateTime,tempSingleMean_UNDE))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,tempSingleMean_CRAM), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+c = a+b
+c
+dev.off() 
+
+pdf("./figures/prpo_dcfs_airtemp_compare.pdf", width = 40, height = 20)
+a <- ggplot(temp_compare_dcfs, aes(tempSingleMean_DCFS, tempSingleMean_PRPO))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("DCFS vs PRPO Air Temp")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+
+b <- ggplot(temp_compare_dcfs, aes(endDateTime,tempSingleMean_DCFS))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,tempSingleMean_PRPO), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+c = a+b
+c
+dev.off() 
+
+pdf("./figures/prla_dcfs_airtemp_compare.pdf", width = 40, height = 20)
+a <- ggplot(temp_compare_dcfs, aes(tempSingleMean_DCFS, tempSingleMean_PRLA))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_smooth(method = "lm")+
+  ggtitle("DCFS vs PRLA Air Temp")+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+
+b <- ggplot(temp_compare_dcfs, aes(endDateTime,tempSingleMean_DCFS))+
+  geom_point(pch = 21, size = 0.6)+
+  geom_point(aes(endDateTime,tempSingleMean_PRLA), color = "red", pch = 21, size = 0.6)+
+  theme_classic()+
+  theme(axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"))
+c = a+b
+c
+dev.off() 
 
 # -------------------------------------------------------------------
