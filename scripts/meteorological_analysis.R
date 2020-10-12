@@ -5,7 +5,7 @@
 #* AUTHOR:  Ryan McClure                                         *
 #* DATE:    08Oct2020                                            *
 #* PROJECT: CIBR                                                 *
-#* PURPOSE: Compare the met stations on lake to EC tower met data*
+#* PURPOSE: Downlad the met data and get it in a GLM format      *
 #*****************************************************************
 
 # Get packages
@@ -15,44 +15,122 @@ pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork)
 # Bypass the latest CRAN version of neonstore and use Carl's most recent Github push
 devtools::install_github("cboettig/neonstore")
 
+sites = c("TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM", "OSBS", "TOOL", "DCFS", "UNDE")
 lake_sites = c("TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
 tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE")
 
-# Humidity
-met_product_hum = "DP1.00098.001"
-lapply(met_product_hum, neonstore::neon_download, site = lake_sites, 
-       start_date = "2013-01-01", end_date = "2020-10-01",
+
+# Download the newest data from NEON
+met_product_hum = "DP1.00098.001"                                                       # Humidity
+lapply(met_product_hum, neonstore::neon_download, site = sites, 
+       start_date = "2014-01-01", end_date = NA,
        file_regex = "[.]csv")
-neonstore::neon_store(table = "RH_1min-expanded")
-rel_hum_dat <- neonstore::neon_table(table = "RH_1min-expanded", site = lake_sites) %>%
-  select(endDateTime, RHMean, siteID)
-filter(endDateTime >= hms::as.hms('16:59:00'),
-       endDateTime <= hms::as.hms('17:01:00'),)
 
-
-# Air Temperature
-met_product_airT = "DP1.00002.001"
+met_product_airT = "DP1.00002.001"                                                      # Air Temperature
 lapply(met_product_airT, neonstore::neon_download, site = sites, 
-       start_date = "2013-01-01", end_date = "2020-10-01",
+       start_date = "2014-01-01", end_date = NA,
        file_regex = "[.]csv")
 
-# Shortwave and Longwave Radiation
-met_product_rad = "DP1.00023.001"
+met_product_rad = "DP1.00023.001"                                                       # SW & LW Radiation
 lapply(met_product_rad, neonstore::neon_download, site = sites, 
-       start_date = "2013-01-01", end_date = "2020-10-01",
+       start_date = "2014-01-01", end_date = NA,
        file_regex = "[.]csv")
 
-# Precipitation
-met_product_precip = "DP1.00006.001"
+met_product_precip = "DP1.00006.001"                                                    # Precipitation
 lapply(met_product_precip, neonstore::neon_download, site = sites, 
-       start_date = "2013-01-01", end_date = "2020-10-01",
+       start_date = "2014-01-01", end_date = "2020-10-01",
        file_regex = "[.]csv")
 
-# 2D Windspeed
-met_product_wind = "DP1.00001.001"
+met_product_wind = "DP1.00001.001"                                                      # 2D Windspeed
 lapply(met_product_wind, neonstore::neon_download, site = sites, 
-       start_date = "2013-01-01", end_date = "2020-10-01",
+       start_date = "2014-01-01", end_date = NA,
        file_regex = "[.]csv")
+
+
+# Unpack the stored files to be accessible in R
+# Currently using the 30min aggregated data for most variables except Windspeed
+neonstore::neon_store(table = "RH_30min-expanded")
+neonstore::neon_store(table = "SAAT_30min-expanded")
+neonstore::neon_store(table = "SLRNR_30min-expanded")
+neonstore::neon_store(table = "SECPRE_30min-expanded")
+neonstore::neon_store(table = "2DWSD_1min-expanded")
+
+
+# Make the stored NEON data product a data table in R
+rel_hum_dat <- neonstore::neon_table(table = "RH_30min-expanded", site = lake_sites) %>%
+  select(endDateTime, RHMean, siteID)
+
+air_temp_dat <- neonstore::neon_table(table = "SAAT_30min-expanded", site = lake_sites)%>% 
+  select(endDateTime, tempSingleMean, siteID)
+
+radiation_dat <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = lake_sites) %>%
+  select(endDateTime, inSWMean, outSWMean, inLWMean, outLWMean, siteID)%>%
+  mutate(SWMean = inSWMean - outSWMean)%>%
+  mutate(LWMean = inLWMean - outLWMean)%>%
+  select(endDateTime, SWMean, LWMean, siteID)
+
+precip_dat <- neonstore::neon_table(table = "SECPRE_30min-expanded", site = lake_sites)%>% 
+  select(endDateTime, secPrecipBulk, siteID)
+
+windspeed_dat <- neonstore::neon_table(table = "2DWSD_1min-expanded", site = lake_sites) %>%
+  select(endDateTime, windSpeedMean, siteID)%>%
+# ------------------------------------------------------------------------------------------  
+  filter(endDateTime >= hms::as.hms('23:59:00'),
+         endDateTime <= hms::as.hms('00:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('00:59:00'),
+         endDateTime <= hms::as.hms('01:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('01:59:00'),
+         endDateTime <= hms::as.hms('02:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('02:59:00'),
+         endDateTime <= hms::as.hms('03:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('03:59:00'),
+         endDateTime <= hms::as.hms('04:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('04:59:00'),
+         endDateTime <= hms::as.hms('05:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('05:59:00'),
+         endDateTime <= hms::as.hms('06:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('06:59:00'),
+         endDateTime <= hms::as.hms('07:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('07:59:00'),
+         endDateTime <= hms::as.hms('08:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('08:59:00'),
+         endDateTime <= hms::as.hms('09:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('09:59:00'),
+         endDateTime <= hms::as.hms('10:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('10:59:00'),
+         endDateTime <= hms::as.hms('11:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('11:59:00'),
+         endDateTime <= hms::as.hms('12:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('12:59:00'),
+         endDateTime <= hms::as.hms('13:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('13:59:00'),
+         endDateTime <= hms::as.hms('14:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('14:59:00'),
+         endDateTime <= hms::as.hms('15:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('15:59:00'),
+         endDateTime <= hms::as.hms('15:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('15:59:00'),
+         endDateTime <= hms::as.hms('16:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('16:59:00'),
+         endDateTime <= hms::as.hms('17:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('17:59:00'),
+         endDateTime <= hms::as.hms('18:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('18:59:00'),
+         endDateTime <= hms::as.hms('19:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('19:59:00'),
+         endDateTime <= hms::as.hms('20:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('20:59:00'),
+         endDateTime <= hms::as.hms('21:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('21:59:00'),
+         endDateTime <= hms::as.hms('22:01:00'))%>%
+  filter(endDateTime >= hms::as.hms('22:59:00'),
+         endDateTime <= hms::as.hms('23:01:00'))
+# ------------------------------------------------------------------------------------------ 
+
+
+
+
+
 
 
 
@@ -68,27 +146,6 @@ NEON_lake_met <- left_join(radiation_dat, air_temp_dat, by=c('startDateTime','si
   mutate(year_month = format(as.Date(startDateTime, "%Y-%m-%d"), "%Y-%m"))%>%
   arrange(startDateTime)
 
-# Humidity
-# -------------------------------------------------------------------
-rel_hum_dat <- neonstore::neon_read(
-  table = "RH_30min-expanded",
-  product = "DP1.00098.001",
-  site = NA,
-  start_date = "2013-01-01",
-  end_date = NA,
-  ext = "csv",
-  timestamp = NA,
-  files = NULL,
-  sensor_metadata = TRUE,
-  altrep = FALSE
-) %>% select(endDateTime, RHMean, verticalPosition, siteID)
-
-neonstore::neon_store(table = "SLRNR_30min-expanded")
-radiation_dat <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = sites) %>%
-  select(endDateTime, inSWMean, outSWMean, inLWMean, outLWMean,verticalPosition, siteID)%>%
-  mutate(SWMean = inSWMean - outSWMean)%>%
-  mutate(LWMean = inLWMean - outLWMean)%>%
-  select(endDateTime, SWMean, LWMean, verticalPosition, siteID)
 # Lake hum
 rel_hum_dat_BARC <- rel_hum_dat %>% filter(siteID == "BARC") %>% filter(verticalPosition == "000") %>% select(-verticalPosition, -siteID)
 rel_hum_dat_SUGG <- rel_hum_dat %>% filter(siteID == "SUGG") %>% filter(verticalPosition == "000") %>% select(-verticalPosition, -siteID)
@@ -189,19 +246,6 @@ dev.off()
 
 # AirTemp
 # -------------------------------------------------------------------
-air_temp_dat <- neonstore::neon_read(
-  table = "SAAT_30min-expanded",
-  product = "DP1.00002.001",
-  site = NA,
-  start_date = "2013-01-01",
-  end_date = NA,
-  ext = "csv",
-  timestamp = NA,
-  files = NULL,
-  sensor_metadata = TRUE,
-  altrep = FALSE
-) %>% select(endDateTime, tempSingleMean, verticalPosition, siteID) %>%
-  group_by(endDateTime)
 
 # Lake Air temp
 air_temp_dat_BARC <- air_temp_dat %>% filter(siteID == "BARC") %>% filter(verticalPosition == "000") %>% select(-verticalPosition, -siteID)

@@ -3,8 +3,7 @@
 ### http://ldas.gsfc.nasa.gov/nldas/NLDAS2forcing.php
 ### Author: Hilary Dugan hilarydugan@gmail.com
 ### Date: 2017-01-20
-######################################################z #####
-rm(list=ls())
+###########################################################
 
 pacman::p_load(RCurl,lubridate,raster,ncdf4,rgdal,httr)
 
