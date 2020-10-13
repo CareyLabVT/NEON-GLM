@@ -77,19 +77,12 @@ lapply(met_product, neon_download, site = site,
 # observed variables in the lakes
 
 # Lake level in meters
-water_level <- neonstore::neon_read(
-  table = "EOS_30_min-expanded",
-  product = "DP1.20016.001",
-  site = c("BARC","CRAM","PRLA", "PRPO", "SUGG", "TOOK"),
-  start_date = "2013-01-01",
-  end_date = "2020-08-01",
-  ext = "csv",
-  timestamp = NA,
-  files = NULL,
-  sensor_metadata = TRUE,
-  altrep = FALSE)%>%
-  select(startDateTime,siteID,surfacewaterElevMean)%>%
-  mutate(year_month = format(as.Date(startDateTime, "%Y-%m-%d"), "%Y-%m"))%>%
+water_level <- neonstore::neon_read(table = "EOS_30_min-expanded",
+  product = "DP1.20016.001",site = c("BARC","CRAM","PRLA", "PRPO", "SUGG", "TOOK"),
+  start_date = "2013-01-01",end_date = "2020-08-01",ext = "csv",timestamp = NA,files = NULL,
+  sensor_metadata = TRUE,altrep = FALSE)%>%
+  select(endDateTime,siteID,surfacewaterElevMean)%>%
+  mutate(year_month = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m"))%>%
   arrange(siteID, startDateTime)
 
 # Water temperature by depth

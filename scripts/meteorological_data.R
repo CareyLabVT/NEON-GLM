@@ -11,7 +11,7 @@
 # Get packages and specify sites to download
 # -----------------------------------------------------------------------------------------------------------------
 if (!require('pacman')) install.packages('pacman'); library('pacman')
-pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork)
+pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo)
 
 # Bypass the latest CRAN version of neonstore and use Carl's most recent Github push
 devtools::install_github("cboettig/neonstore")
@@ -172,3 +172,25 @@ NEON_met_data_hourly <- left_join(radiation_dat, air_temp_dat, by=c('endDateTime
   mutate(Snow = ifelse(tempSingleMean <= 0, secPrecipBulk, 0))%>%
   select(time,siteID,SWMean,LWMean,tempSingleMean,WindSpeed,secPrecipBulk,RHMean,Snow)
 # -----------------------------------------------------------------------------------------------------------------
+
+# Make the BARCO and SUGG Met data files for the GLM run
+BARC_met <- NEON_met_data_hourly %>% filter(siteID == "BARC") %>% 
+  filter(time >= as.POSIXct("2018-01-01 00:00:00", tz = "GMT")) %>% filter(time <= as.POSIXct("2020-07-31 00:00:00", tz = "GMT"))%>%
+  select(-siteID)%>%
+  rename(ShortWave = SWMean, LongWave = LWMean, AirTemp = tempSingleMean, RelHum = RHMean, Rain = secPrecipBulk)%>%
+  select(time, ShortWave, LongWave, AirTemp, RelHum, WindSpeed, Rain, Snow)
+
+# Just starting with the simple na.approx method. 
+# Will download NLDAS and the tower data to build and empirical relationship to fill NAs soon
+BARC_met$ShortWave <- na.approx(BARC_met$ShortWave)
+BARC_met$LongWave <- na.approx(BARC_met$LongWave)
+BARC_met$AirTemp <- na.approx(BARC_met$AirTemp)
+BARC_met$RelHum <- na.approx(BARC_met$RelHum)
+BARC_met$WindSpeed <- na.approx(BARC_met$WindSpeed)
+BARC_met$Rain <- na.approx(BARC_met$Rain)
+BARC_met$Snow <- na.approx(BARC_met$Snow)
+
+#Currently assuming Barco and Suggs are similar
+#Although I will be checking this soon
+write_csv(BARC_met, "./driver_data/Barco_met_hourly_GMT.csv")
+write_csv(BARC_met, "./driver_data/Suggs_met_hourly_GMT.csv")
