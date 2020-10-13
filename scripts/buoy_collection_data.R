@@ -83,12 +83,22 @@ water_temp_obs <- neonstore::neon_read(table = "TSD_30_min-expanded",product = "
 
 water_temp_barc <- water_temp_obs %>% filter(siteID == "BARC") %>%
   mutate(DateTime = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
-  filter(DateTime>="2019-01-01") %>%
+  filter(DateTime>="2018-01-01") %>%
   filter(DateTime<="2020-07-31") %>%
   rename(Depth = thermistorDepth, temp = tsdWaterTempMean)%>%
   group_by(DateTime, Depth)%>%
   summarise_all(funs(mean))%>%
   filter(temp > 10)%>%
   select(DateTime, Depth, temp)%>%write_csv(.,'./observations/CleanedObsTempBARC.csv')
+
+water_temp_sugg <- water_temp_obs %>% filter(siteID == "SUGG") %>%
+  mutate(DateTime = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
+  filter(DateTime>="2018-01-01") %>%
+  filter(DateTime<="2020-07-31") %>%
+  rename(Depth = thermistorDepth, temp = tsdWaterTempMean)%>%
+  group_by(DateTime, Depth)%>%
+  summarise_all(funs(mean))%>%
+  filter(temp > 10)%>%
+  select(DateTime, Depth, temp)%>%write_csv(.,'./observations/CleanedObsTempSUGG.csv')
 # ------------------------------------------------------------------------------------------ 
 
