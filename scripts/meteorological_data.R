@@ -14,44 +14,56 @@ if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo)
 
 # Bypass the latest CRAN version of neonstore and use Carl's most recent Github push
-devtools::install_github("cboettig/neonstore")
-sites = c("TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM", "OSBS", "TOOL", "DCFS", "UNDE")
-lake_sites = c("TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
-tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE")
+devtools::install_github("cboettig/neonstore", force = F)
 
+sites_all = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM", "OSBS", "TOOL", "DCFS", "UNDE")
+lake_sites = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
+tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE")
 # -----------------------------------------------------------------------------------------------------------------
 
 # Download the newest data from NEON
 # -----------------------------------------------------------------------------------------------------------------
+neonstore::neon_delete_db()
+Sys.setenv(NEONSTORE_HOME = tempdir("D:/RYAN/neonstore"))
+neonstore::neon_dir()
+
+dir = "D:/RYAN/neonstore"
+
 met_product_hum = "DP1.00098.001"                                                       # Humidity
-lapply(met_product_hum, neonstore::neon_download, site = sites, 
-       start_date = "2017-01-01", end_date = "2020-10-01",
+lapply(met_product_hum, neonstore::neon_download, site = lake_sites, 
+       start_date = "2017-01-01", dir = dir, end_date = "2020-10-01",
        file_regex = "[.]csv")
 
 met_product_airT = "DP1.00002.001"                                                      # Air Temperature
-lapply(met_product_airT, neonstore::neon_download, site = sites, 
-       start_date = "2017-01-01", end_date = "2020-10-01",
+lapply(met_product_airT, neonstore::neon_download, site = lake_sites, 
+       start_date = "2017-01-01", dir = dir, end_date = "2020-10-01",
        file_regex = "[.]csv")
 
 met_product_rad = "DP1.00023.001"                                                       # SW & LW Radiation
-lapply(met_product_rad, neonstore::neon_download, site = sites, 
-       start_date = "2017-01-01", end_date = "2020-10-01",
+lapply(met_product_rad, neonstore::neon_download, site = lake_sites, 
+       start_date = "2017-01-01", dir = dir, end_date = "2020-10-01",
        file_regex = "[.]csv")
 
 met_product_precip = "DP1.00006.001"                                                    # Precipitation
 lapply(met_product_precip, neonstore::neon_download, site = sites, 
-       start_date = "2014-01-01", end_date = "2020-10-01",
+       start_date = "2014-01-01", dir = dir, end_date = "2020-10-01",
+       file_regex = "[.]csv")
+
+met_product_precip = "DP1.00006.001"                                                    # Precipitation
+lapply(met_product_precip, neonstore::neon_download, site = sites, 
+       start_date = "2014-01-01", dir = dir, end_date = "2020-10-01",
        file_regex = "[.]csv")
 
 met_product_wind = "DP1.00001.001"                                                      # 2D Windspeed
 lapply(met_product_wind, neonstore::neon_download, site = sites, 
-       start_date = "2017-01-01", end_date = "2020-10-01",
+       start_date = "2017-01-01", dir = dir, end_date = "2020-10-01",
        file_regex = "[.]csv")
 # -----------------------------------------------------------------------------------------------------------------
 
 # Make the stored NEON data product a data table in R
 # -----------------------------------------------------------------------------------------------------------------
-rel_hum_dat <- neonstore::neon_read(table = "RH_30min-expanded", product = "DP1.00098.001", site = lake_sites,
+
+rel_hum_dat <- neonstore::neon_read(table = "RH_1min-expanded", product = "DP1.00098.001", site = lake_sites,
   start_date = "2017-01-01", end_date = "2020-08-01", ext = "csv", timestamp = NA, files = NULL, sensor_metadata = TRUE, altrep = FALSE) %>% 
   select(endDateTime, RHMean, siteID)
 
@@ -61,10 +73,7 @@ air_temp_dat <- neonstore::neon_read(table = "SAAT_30min-expanded", product = "D
 
 radiation_dat <- neonstore::neon_read(table = "SLRNR_30min-expanded", product = "DP1.00023.001", site = lake_sites,
   start_date = "2017-01-01", end_date = "2020-08-01", ext = "csv", timestamp = NA, files = NULL, sensor_metadata = TRUE, altrep = FALSE) %>%
-  select(endDateTime, inSWMean, outSWMean, inLWMean, outLWMean, siteID)%>%
-  mutate(SWMean = inSWMean - outSWMean)%>%
-  mutate(LWMean = inLWMean - outLWMean)%>%
-  select(endDateTime, SWMean, LWMean, siteID)
+  select(endDateTime, inSWMean, outLWMean, siteID)
 
 # Read and organize the precip data
 precip_dat_l <- neonstore::neon_read(table = "SECPRE_30min-expanded", product = "DP1.00006.001", site = lake_sites,
