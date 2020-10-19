@@ -90,28 +90,50 @@
 # 3rd choice --> prpo_lw = (dcfs_lw * 1.027e+00) - 1.288e+01
 
 # PRLA Longwave models
-# 1st choice --> prla_lw = (dcfs_lw * 0.690547) + (prpo_lw * 0.310355) + 0.798390
-# 2nd choice --> prla_lw = (dcfs_lw * 0.9845556) - 1.288e+01
-# 3rd choice --> prla_lw = (prpo_lw * 1.004591) - 0.062928
+# 1st choice --> prla_lw = (dcfs_lw * 0.413779) + (prpo_lw * 0.606779) - 7.626762
+# 2nd choice --> prla_lw = (dcfs_lw * 1.037) - 1.543e+01
+# 3rd choice --> prla_lw = (prpo_lw * 1.004591) - 0.7697168
 
-prpo_longwave <- radiation %>%
-  filter(siteID == "PRPO") %>%
-  select(time, outLWMean)
-prla_longwave <- radiation %>%
-  filter(siteID == "PRLA")%>%
-  select(time, outLWMean)
-dcfs_longwave <- radiation %>%
-  filter(siteID == "DCFS")%>%
-  select(time, outLWMean)
+# Florida Lakes
 
-prpo_prla_dcfs_longwave_models <- left_join(prpo_longwave, prla_longwave, by = "time") %>%
-  left_join(., dcfs_longwave, by = "time") %>%
-  select(time, outLWMean.x, outLWMean.y, outLWMean) %>%
-  rename(prpo_lw = outLWMean.x, prla_lw = outLWMean.y, dcfs_lw = outLWMean)%>%
-  filter(prpo_lw != "NaN")
+# BARC AirTemp models
+# 1st choice --> barc_t = (osbs_t * 0.37029) + (sugg_t * 0.65278) - 0.29576
+# 2nd choice --> barc_t = (sugg_t * 1.014810) + 0.089393
+# 3rd choice --> barc_t = (osbs_t * 1.0337459) - 0.8161512
 
-prpo_prla_dcfs_lw_model <- lm(prpo_lw ~ prla_lw, data = prpo_prla_dcfs_longwave_models)
-summary(prpo_prla_dcfs_lw_model)
+# SUGG AirTemp models
+# 1st choice --> sugg_t = (osbs_t * 0.48523) + (barc_t * 0.51256) - 0.42429
+# 2nd choice --> sugg_t = (barc_t * 0.976858) + 0.110030
+# 3rd choice --> sugg_t = (osbs_t * 1.014450) - 0.865453
+
+# BARC humidity models
+# 1st choice --> barc_h = (osbs_h * 0.232243) + (sugg_h * 0.753246) + 0.174773
+# 2nd choice --> barc_h = (sugg_h * 1.014810) - 0.977321
+# 3rd choice --> barc_h = (osbs_h * 1.0337459) - 0.8161512
+
+# SUGG humidity models
+# 1st choice --> sugg_h = (osbs_h * 0.48523) + (barc_h * 0.51256) - 0.42429
+# 2nd choice --> sugg_h = (barc_h * 0.976858) + 0.110030
+# 3rd choice --> sugg_h = (osbs_h * 1.014450) - 0.865453
+
+barc_hum <- humidity %>%
+  filter(siteID == "BARC") %>%
+  select(time, RHMean)
+sugg_hum <- humidity %>%
+  filter(siteID == "SUGG")%>%
+  select(time, RHMean)
+osbs_hum <- humidity %>%
+  filter(siteID == "OSBS")%>%
+  select(time, RHMean)
+
+barc_sugg_osbs_humidity_models <- left_join(barc_hum, sugg_hum, by = "time") %>%
+  left_join(., osbs_hum, by = "time") %>%
+  select(time, RHMean.x, RHMean.y, RHMean) %>%
+  rename(barc_h = RHMean.x, sugg_h = RHMean.y, osbs_h = RHMean)%>%
+  filter(barc_h != "NaN")
+
+barc_sugg_osbs_hum_model <- lm(barc_h ~ sugg_h, data = barc_sugg_osbs_humidity_models)
+summary(barc_sugg_osbs_hum_model)
 
 
 # Florida Lakes

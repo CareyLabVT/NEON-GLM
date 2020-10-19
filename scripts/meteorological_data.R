@@ -102,13 +102,17 @@ precip <- precip %>%
   summarize_at(c("secPrecipBulk"), sum, na.rm = TRUE)%>%
   arrange(siteID, time)
 
-windspeed <- neonstore::neon_read(table = "2DWSD_2min-expanded", product = "DP1.00001.001", site = sites_all,
+windspeed <- neonstore::neon_read(table = "2DWSD_30min-expanded", product = "DP1.00001.001", site = sites_all,
   start_date = "2017-01-01", end_date = "2020-08-01", ext = "csv", timestamp = NA, files = NULL, sensor_metadata = TRUE, altrep = FALSE) %>%
   select(endDateTime, windSpeedMean, siteID)
 
 
-
-
+windspeed <- windspeed %>%
+  mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
+  select(-endDateTime)%>%
+  group_by(time, siteID) %>%
+  summarize_at(c("secPrecipBulk"), sum, na.rm = TRUE)%>%
+  arrange(siteID, time)
 
 h0 <-  windspeed_dat %>% mutate(h_m_s = hms::as.hms(endDateTime, tz = 'GMT')) %>% 
   filter(h_m_s == hms("00:00:00"))
