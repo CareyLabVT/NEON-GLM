@@ -102,19 +102,56 @@ precip <- precip %>%
   summarize_at(c("secPrecipBulk"), sum, na.rm = TRUE)%>%
   arrange(siteID, time)
 
+# Florida site precipitation
+precip_barc <- precip %>%
+  filter(siteID == "OSBS") %>%
+  mutate(siteID = replace(siteID, siteID=="OSBS", "BARC")) %>%
+  as.data.frame()
+
+precip_sugg <- precip %>%
+  filter(siteID == "OSBS") %>%
+  mutate(siteID = replace(siteID, siteID=="OSBS", "SUGG")) %>%
+  as.data.frame()
+
+# Wisconsin site precipitation
+precip_cram <- precip %>%
+  filter(siteID == "UNDE") %>%
+  mutate(siteID = replace(siteID, siteID=="UNDE", "CRAM")) %>%
+  as.data.frame()
+
+precip_liro <- precip %>%
+  filter(siteID == "UNDE") %>%
+  mutate(siteID = replace(siteID, siteID=="UNDE", "LIRO")) %>%
+  as.data.frame()
+
+# Kansas site precipitation
+precip_prpo <- precip %>%
+  filter(siteID == "DCFS") %>%
+  mutate(siteID = replace(siteID, siteID=="DCFS", "PRPO")) %>%
+  as.data.frame()
+
+precip_prla <- precip %>%
+  filter(siteID == "DCFS") %>%
+  mutate(siteID = replace(siteID, siteID=="DCFS", "PRLA")) %>%
+  as.data.frame()
+
+# Alaska site precipitation
+precip_took <- precip %>%
+  filter(siteID == "TOOK")
+
+
 windspeed <- neonstore::neon_read(table = "2DWSD_30min-expanded", product = "DP1.00001.001", site = sites_all,
   start_date = "2017-01-01", end_date = "2020-08-01", ext = "csv", timestamp = NA, files = NULL, sensor_metadata = TRUE, altrep = FALSE) %>%
   select(endDateTime, windSpeedMean, siteID)
-
 
 windspeed <- windspeed %>%
   mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
   select(-endDateTime)%>%
   group_by(time, siteID) %>%
-  summarize_at(c("secPrecipBulk"), sum, na.rm = TRUE)%>%
+  summarize_at(c("windSpeedMean"), sum, na.rm = TRUE)%>%
   arrange(siteID, time)
 
-h0 <-  windspeed_dat %>% mutate(h_m_s = hms::as.hms(endDateTime, tz = 'GMT')) %>% 
+h0 <-  windspeed %>% mutate(h_m_s = hms::as.hms(endDateTime, tz = 'GMT')) %>% 
   filter(h_m_s == hms("00:00:00"))
 h1 <-  windspeed_dat %>% mutate(h_m_s = hms::as.hms(endDateTime, tz = 'GMT')) %>% 
   filter(h_m_s == hms("01:00:00"))
@@ -174,18 +211,9 @@ windspeed <- rbind(h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, 
 
 # Bind all of the met data together
 # -----------------------------------------------------------------------------------------------------------------
-NEON_met_data_hourly <- left_join(radiation_dat, air_temp_dat, by=c('endDateTime','siteID')) %>%
-  left_join(., rel_hum_dat, by=c('endDateTime','siteID'))%>%
-  select(endDateTime,siteID,SWMean,LWMean,tempSingleMean,RHMean)%>%
-  mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
-  select(-endDateTime)%>%
-  group_by(time, siteID) %>%
-  summarize_all(funs(mean))%>%
-  arrange(siteID, time)%>%
-  left_join(., windspeed_dat_hour, by=c('time','siteID'))%>%
-  left_join(., precip_dat_hour, by=c('time','siteID'))%>%
-  mutate(Snow = ifelse(tempSingleMean <= 0, secPrecipBulk, 0))%>%
-  select(time,siteID,SWMean,LWMean,tempSingleMean,WindSpeed,secPrecipBulk,RHMean,Snow)
+NEON_met_data_hourly <- left_join(radiation, airtemp, by=c('time','siteID')) %>%
+  left_join(., humidity, by=c('time','siteID'))%>%
+  select(time,siteID,inSWMean,outLWMean,tempSingleMean,RHMean)
 # -----------------------------------------------------------------------------------------------------------------
 
 # Make the BARCO and SUGG Met data files for the GLM run
@@ -194,6 +222,8 @@ BARC_met <- NEON_met_data_hourly %>% filter(siteID == "BARC") %>%
   select(-siteID)%>%
   rename(ShortWave = SWMean, LongWave = LWMean, AirTemp = tempSingleMean, RelHum = RHMean, Rain = secPrecipBulk)%>%
   select(time, ShortWave, LongWave, AirTemp, RelHum, WindSpeed, Rain, Snow)
+
+
 
 # Just starting with the simple na.approx method. 
 # Will download NLDAS and the tower data to build and empirical relationship to fill NAs soon
