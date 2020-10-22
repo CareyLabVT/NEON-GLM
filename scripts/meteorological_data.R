@@ -213,16 +213,17 @@ windspeed <- rbind(h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, 
 # -----------------------------------------------------------------------------------------------------------------
 NEON_met_data_hourly <- left_join(radiation, airtemp, by=c('time','siteID')) %>%
   left_join(., humidity, by=c('time','siteID'))%>%
-  select(time,siteID,inSWMean,outLWMean,tempSingleMean,RHMean)
+  left_join(., windspeed, by=c('time','siteID'))%>%
+  select(time,siteID,inSWMean,outLWMean,tempSingleMean,windSpeedMean,RHMean)
 # -----------------------------------------------------------------------------------------------------------------
 
 # Make the BARCO and SUGG Met data files for the GLM run
 BARC_met <- NEON_met_data_hourly %>% filter(siteID == "BARC") %>% 
-  filter(time >= as.POSIXct("2018-01-01 00:00:00", tz = "GMT")) %>% filter(time <= as.POSIXct("2020-07-31 00:00:00", tz = "GMT"))%>%
-  select(-siteID)%>%
-  rename(ShortWave = SWMean, LongWave = LWMean, AirTemp = tempSingleMean, RelHum = RHMean, Rain = secPrecipBulk)%>%
-  select(time, ShortWave, LongWave, AirTemp, RelHum, WindSpeed, Rain, Snow)
-
+  left_join(., precip_barc, by = c("time"))%>%
+  select(-siteID.x)%>%
+  rename(ShortWave = inSWMean, LongWave = outLWMean, AirTemp = tempSingleMean, WindSpeed = windSpeedMean, RelHum = RHMean, Rain = secPrecipBulk)%>%
+  select(time, ShortWave, LongWave, AirTemp, RelHum, WindSpeed, Rain)%>%
+  muutate(Shortwave)
 
 
 # Just starting with the simple na.approx method. 
