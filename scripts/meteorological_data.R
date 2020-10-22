@@ -13,8 +13,14 @@
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo)
 
+# Download and load duckdb_r
+# remember a mac is squiggle ~/ and a PC is period ./
+download.file("https://github.com/cwida/duckdb/releases/download/master-builds/duckdb_r_src.tar.gz", destfile = "./duckdb_r_src.tar.gz")
+install.packages("duckdb_r_src.tar.gz", repo = NULL)
+
 # Bypass the latest CRAN version of neonstore and use Carl's most recent Github push
-devtools::install_github("cboettig/neonstore")
+remotes::install_github("cboettig/neonstore")
+
 
 sites_all = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM", "OSBS", "TOOL", "DCFS", "UNDE")
 lake_sites = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
@@ -24,8 +30,9 @@ tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE")
 # Download the newest data from NEON
 # -----------------------------------------------------------------------------------------------------------------
 
+
 met_product_hum = "DP1.00098.001"                                                       # Humidity
-lapply(met_product_hum, neonstore::neon_download, site = lake_sites, 
+lapply(met_product_hum, neonstore::neon_download, site = sites_all, 
        start_date = "2017-01-01", end_date = "2020-10-01",
        file_regex = "[.]csv")
 
