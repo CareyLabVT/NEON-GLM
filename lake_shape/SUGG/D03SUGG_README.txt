@@ -1,1 +1,0 @@
-Tracks 45 and 46 were pulled from SUGG bathymetry interpolation processing. The depth data appear to be bad/inconsistent compared to surrounding tracks.

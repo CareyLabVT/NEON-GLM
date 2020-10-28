@@ -45,7 +45,7 @@ water_product = c("DP1.20267.001", "DP1.20261.001", "DP1.20042.001", "DP1.20163.
 neonstore::neon_download(product = met_products, site = sites_all)
 
 # Download water products
-neonstore::neon_download(product = met_products, site = sites_all)
+neonstore::neon_download(product = water_product, site = lake_sites)
 
 # -----------------------------------------------------------------------------------------------------------------
 # Make the stored NEON data product a data table in R
@@ -55,7 +55,7 @@ neonstore::neon_store(table = "RH_30min-expanded")
 neonstore::neon_store(table = "SAAT_30min-expanded")
 neonstore::neon_store(table = "SLRNR_30min-expanded")
 neonstore::neon_store(table = "SECPRE_30min-expanded")
-neonstore::neon_store(table = "2DWSD_30min-expanded")
+neonstore::neon_store(table = "2DWSD_2min-expanded")
 
 #The data are too large to pullin all at once and to compartmentalize. Thus, I have pulled each site in individually
 
