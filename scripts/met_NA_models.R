@@ -8,31 +8,89 @@
 #* PURPOSE: Fill in the NAs with a better model than na.approx   *
 #*****************************************************************
 
+if (!require('pacman')) install.packages('pacman'); library('pacman')
+pacman::p_load(VIM, naniar, missMDA, Amelia, mice, FactoMineR)
+
+a <- vis_miss(BARC_met, sort_miss = F) 
+b <- vis_miss(SUGG_met, sort_miss = F) 
+
+c <- a+b
+c
+
 FL_met_models <- left_join(BARC_met, SUGG_met, by = "time")%>%
   left_join(., OSBS_met, by = "time")
 
+# SUGG AirTemp
+sugg_fit_at_1 <- lm(AirTemp.y ~ AirTemp.x+AirTemp, data = FL_met_models)
+sugg_fit_at_2 <- lm(AirTemp.y ~ AirTemp.x, data = FL_met_models)
 
-barc_fit_sw_1 <- lm(ShortWave.x ~ AirTemp.x + ShortWave.y, data = FL_met_models)
 
-FL_met_models$ShortWave.x <- ifelse(is.na(FL_met_models$ShortWave.x),
-                                    FL_met_models$AirTemp.x*barc_fit_sw_1$coefficients[3]+
-                                    FL_met_models$ShortWave.y*barc_fit_sw_1$coefficients[2]-
-                                    barc_fit_sw_1$coefficients[1], FL_met_models$ShortWave.x)
+FL_met_models$AirTemp.y <- ifelse(is.na(FL_met_models$AirTemp.y),
+                                    FL_met_models$AirTemp*sugg_fit_at_1$coefficients[3]+
+                                    FL_met_models$AirTemp.x*sugg_fit_at_1$coefficients[2]+
+                                    sugg_fit_at_1$coefficients[1], FL_met_models$AirTemp.y)
+
+FL_met_models$AirTemp.y <- ifelse(is.na(FL_met_models$AirTemp.y),
+                                    FL_met_models$AirTemp.x*sugg_fit_at_2$coefficients[2]+
+                                    sugg_fit_at_2$coefficients[1], FL_met_models$AirTemp.y)
+
+
+plot(FL_met_models$time, FL_met_models$AirTemp.y)
+
 
 FL_met_models$ShortWave.x <- na.spline(FL_met_models$ShortWave.x)
 
 FL_met_models$ShortWave.x <- ifelse(FL_met_models$ShortWave.x <=0, 0, FL_met_models$ShortWave.x)
 FL_met_models$ShortWave.x <- ifelse(FL_met_models$ShortWave.x >=1100, 1000, FL_met_models$ShortWave.x)
 
-summary(FL_met_models$ShortWave.x)
-plot(FL_met_models$time, FL_met_models$ShortWave.x)
 
-
+# BARC longwave
 barc_fit_lw_1 <- lm(LongWave.x ~ LongWave.y, data = FL_met_models)
+FL_met_models$LongWave.x <- ifelse(is.na(FL_met_models$LongWave.x),
+                                    FL_met_models$LongWave.y*barc_fit_lw_1$coefficients[2]+
+                                      barc_fit_lw_1$coefficients[1], FL_met_models$LongWave.x)
+FL_met_models$LongWave.x <- na.spline(FL_met_models$LongWave.x)
 
+FL_met_models$LongWave.x <- ifelse(FL_met_models$LongWave.x >=600, 600, FL_met_models$LongWave.x)
+
+# BARC airtemp
 barc_fit_at_1 <- lm(AirTemp.x ~ AirTemp.y, data = FL_met_models)
+barc_fit_at_2 <- lm(AirTemp.x ~ AirTemp, data = FL_met_models)
+barc_fit_at_3 <- lm(AirTemp.x ~ LongWave.x, data = FL_met_models)
 
+FL_met_models$AirTemp.x <- ifelse(is.na(FL_met_models$AirTemp.x),
+                                   FL_met_models$AirTemp.y*barc_fit_at_1$coefficients[2]+
+                                     barc_fit_at_1$coefficients[1], FL_met_models$AirTemp.x)
+
+FL_met_models$AirTemp.x <- ifelse(is.na(FL_met_models$AirTemp.x),
+                                  FL_met_models$AirTemp*barc_fit_at_2$coefficients[2]-
+                                    barc_fit_at_2$coefficients[1], FL_met_models$AirTemp.x)
+FL_met_models$AirTemp.x <- na.approx(FL_met_models$AirTemp.x)
+
+
+# BARC humidity
 barc_fit_rh_1 <- lm(RelHum.x ~ RelHum.y, data = FL_met_models)
+barc_fit_rh_2 <- lm(RelHum.x ~ RelHum, data = FL_met_models)
+
+FL_met_models$RelHum.x <- ifelse(is.na(FL_met_models$RelHum.x),
+                                  FL_met_models$RelHum.y*barc_fit_rh_1$coefficients[2]-
+                                    barc_fit_rh_1$coefficients[1], FL_met_models$RelHum.x)
+
+FL_met_models$RelHum.x <- ifelse(is.na(FL_met_models$RelHum.x),
+                                 FL_met_models$RelHum*barc_fit_rh_2$coefficients[2]+
+                                   barc_fit_rh_2$coefficients[1], FL_met_models$RelHum.x)
+FL_met_models$RelHum.x <- na.spline(FL_met_models$RelHum.x)
+
+
+
+FL_met_models$RelHum.x <- ifelse(FL_met_models$RelHum.x >=100, 100, FL_met_models$RelHum.x)
+
+
+
+summary(FL_met_models$RelHum.x)
+plot(FL_met_models$time, FL_met_models$RelHum.x)
+
+
 
 FL_met_models$AirTemp.x <- ifelse(is.na(FL_met_models$AirTemp.x),FL_met_models$AirTemp.y * barc_fit_at_1$coefficients[2]-barc_fit_at_1$coefficients[1], FL_met_models$AirTemp.x)
 
