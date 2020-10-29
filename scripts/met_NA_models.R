@@ -13,9 +13,21 @@ pacman::p_load(VIM, naniar, missMDA, Amelia, mice, FactoMineR)
 
 a <- vis_miss(BARC_met, sort_miss = F) 
 b <- vis_miss(SUGG_met, sort_miss = F) 
+c <- vis_miss(PRPO_met, sort_miss = F)
+d <- vis_miss(PRLA_met, sort_miss = F)
+e <- vis_miss(CRAM_met, sort_miss = F)
+f <- vis_miss(LIRO_met, sort_miss = F)
+g <- vis_miss(TOOK_met, sort_miss = F)
 
-c <- a+b
-c
+c <- (a+b+c+d)/(e+f+g+plot_spacer())
+
+
+barc_out <- amelia(BARC_met, ts = "time", cs = "ShortWave", polytime = 1)
+
+a.out.time <- amelia(BARC_met, ts = "time", cs = "ShortWave", polytime = 2, intercs = TRUE, p2s = 2)
+
+
+
 
 FL_met_models <- left_join(BARC_met, SUGG_met, by = "time")%>%
   left_join(., OSBS_met, by = "time")
