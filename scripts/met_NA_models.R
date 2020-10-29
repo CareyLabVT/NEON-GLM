@@ -21,12 +21,20 @@ g <- vis_miss(TOOK_met, sort_miss = F)
 
 c <- (a+b+c+d)/(e+f+g+plot_spacer())
 
+SUGG_met <- as.data.frame(SUGG_met)
+sugg.amelia <- amelia(SUGG_met, m = 100, polytime = 1, ts = "time")
+compare.density(sugg.amelia, var = "AirTemp")
 
-barc_out <- amelia(BARC_met, ts = "time", cs = "ShortWave", polytime = 1)
+BARC_met <- as.data.frame(BARC_met)
+barc.amelia <- amelia(BARC_met, m = 100, polytime = 1, ts = "time", cs = NULL)
 
-a.out.time <- amelia(BARC_met, ts = "time", cs = "ShortWave", polytime = 2, intercs = TRUE, p2s = 2)
+barc.amelia.sw <- amelia(BARC_met, m = 50, polytime = 1, ts = "time", cs = NULL, lags = "ShortWave", leads = "ShortWave")
 
 
+compare.density(barc.amelia.sw, var = "ShortWave")
+
+
+tscsPlot(barc.amelia, ts = "time", cs = NULL, var = "AirTemp", ylim = c(-5, 40))
 
 
 FL_met_models <- left_join(BARC_met, SUGG_met, by = "time")%>%
