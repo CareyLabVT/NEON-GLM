@@ -8,6 +8,35 @@
 #* PURPOSE: Fill in the NAs with a better model than na.approx   *
 #*****************************************************************
 
+FL_met_models <- left_join(BARC_met, SUGG_met, by = "time")%>%
+  left_join(., OSBS_met, by = "time")
+
+
+barc_fit_sw_1 <- lm(ShortWave.x ~ AirTemp.x + ShortWave.y, data = FL_met_models)
+
+FL_met_models$ShortWave.x <- ifelse(is.na(FL_met_models$ShortWave.x),
+                                    FL_met_models$AirTemp.x*barc_fit_sw_1$coefficients[3]+
+                                    FL_met_models$ShortWave.y*barc_fit_sw_1$coefficients[2]-
+                                    barc_fit_sw_1$coefficients[1], FL_met_models$ShortWave.x)
+
+FL_met_models$ShortWave.x <- na.spline(FL_met_models$ShortWave.x)
+
+FL_met_models$ShortWave.x <- ifelse(FL_met_models$ShortWave.x <=0, 0, FL_met_models$ShortWave.x)
+FL_met_models$ShortWave.x <- ifelse(FL_met_models$ShortWave.x >=1100, 1000, FL_met_models$ShortWave.x)
+
+summary(FL_met_models$ShortWave.x)
+plot(FL_met_models$time, FL_met_models$ShortWave.x)
+
+
+barc_fit_lw_1 <- lm(LongWave.x ~ LongWave.y, data = FL_met_models)
+
+barc_fit_at_1 <- lm(AirTemp.x ~ AirTemp.y, data = FL_met_models)
+
+barc_fit_rh_1 <- lm(RelHum.x ~ RelHum.y, data = FL_met_models)
+
+FL_met_models$AirTemp.x <- ifelse(is.na(FL_met_models$AirTemp.x),FL_met_models$AirTemp.y * barc_fit_at_1$coefficients[2]-barc_fit_at_1$coefficients[1], FL_met_models$AirTemp.x)
+
+
 # Here are all of the possible combinations for the missing data models
 
 # Michigan and Wisconsin Lakes met NA model fills

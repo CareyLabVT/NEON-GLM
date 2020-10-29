@@ -35,7 +35,7 @@ tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE", "TOOK")
 met_products = c("DP1.00098.001", "DP1.00002.001", "DP1.00023.001", "DP1.00006.001", "DP1.00001.001")
 
 water_product = c("DP1.20267.001", "DP1.20261.001", "DP1.20042.001", "DP1.20163.001", "DP1.20252.001", 
-                  "DP1.20097.001","DP1.20093.001", "DP1.20033.001", "DP1.20288.001","DP1.20264.001")
+                  "DP1.20097.001","DP1.20093.001", "DP1.20033.001", "DP1.20288.001")
 # -----------------------------------------------------------------------------------------------------------------
 
 # Download the newest data from NEON
@@ -212,6 +212,17 @@ SUGG_met <- NEON_met_data_hourly_all %>% filter(siteID == c("SUGG")) %>%
          WindSpeed = windSpeedMean)%>%
   select(time, ShortWave, LongWave, AirTemp, RelHum, WindSpeed, Rain)
 
+OSBS_met <- NEON_met_data_hourly_all %>% filter(siteID == c("OSBS")) %>%
+  left_join(., precip_sugg, by=c('time', "siteID"))%>%
+  select(-siteID)%>%
+  rename(ShortWave = inSWMean, 
+         LongWave = outLWMean, 
+         AirTemp = tempSingleMean, 
+         RelHum = RHMean, 
+         Rain = secPrecipBulk,
+         WindSpeed = windSpeedMean)%>%
+  select(time, ShortWave, LongWave, AirTemp, RelHum, WindSpeed, Rain)
+
 # Make the PRPO and PRLA Met data files for the GLM run
 PRPO_met <- NEON_met_data_hourly_all %>% filter(siteID == c("PRPO")) %>%
   left_join(., precip_prpo, by=c('time', "siteID"))%>%
@@ -268,8 +279,3 @@ TOOK_met <- NEON_met_data_hourly_all %>% filter(siteID == c("TOOK")) %>%
          Rain = secPrecipBulk,
          WindSpeed = windSpeedMean)%>%
   select(time, ShortWave, LongWave, AirTemp, RelHum, WindSpeed, Rain)
-
-#Currently assuming Barco and Suggs are similar
-#Although I will be checking this soon
-write_csv(BARC_met, "./driver_data/Barco_met_hourly_GMT.csv")
-write_csv(BARC_met, "./driver_data/Suggs_met_hourly_GMT.csv")
