@@ -9,36 +9,68 @@
 #*****************************************************************
 
 if (!require('pacman')) install.packages('pacman'); library('pacman')
-pacman::p_load(VIM, naniar, missMDA, Amelia, mice, FactoMineR)
+pacman::p_load(VIM, naniar, missMDA, Amelia, mice, FactoMineR, broom)
 
-a <- vis_miss(BARC_met, sort_miss = F) 
-b <- vis_miss(SUGG_met, sort_miss = F) 
-c <- vis_miss(PRPO_met, sort_miss = F)
-d <- vis_miss(PRLA_met, sort_miss = F)
-e <- vis_miss(CRAM_met, sort_miss = F)
-f <- vis_miss(LIRO_met, sort_miss = F)
-g <- vis_miss(TOOK_met, sort_miss = F)
 
-c <- (a+b+c+d)/(e+f+g+plot_spacer())
-
-SUGG_met <- as.data.frame(SUGG_met)
-sugg.amelia <- amelia(SUGG_met, m = 100, polytime = 1, ts = "time")
-compare.density(sugg.amelia, var = "AirTemp")
+# Fill in Missing BARCO data
+vis_miss(BARC_met, sort_miss = F) 
 
 BARC_met <- as.data.frame(BARC_met)
-barc.amelia <- amelia(BARC_met, m = 100, polytime = 1, ts = "time", cs = NULL)
 
-barc.amelia.sw <- amelia(BARC_met, m = 50, polytime = 1, ts = "time", cs = NULL, lags = "ShortWave", leads = "ShortWave")
+#ShortWave
+barc.amelia.sw <- amelia(BARC_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "ShortWave", leads = "ShortWave")
+barc_sw_imputations <- bind_rows(unclass(barc.amelia.sw$imputations), .id = "m") %>%
+  select(time, ShortWave)%>%
+  group_by(time)%>%
+  summarise_all(funs(mean))%>%
+  mutate(ShortWave = ifelse(ShortWave <= 0, 0, ShortWave))
+
+#LongWave
+barc.amelia.lw <- amelia(BARC_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "LongWave", leads = "LongWave")
+barc_lw_imputations <- bind_rows(unclass(barc.amelia.lw$imputations), .id = "m") %>%
+  select(time, LongWave)%>%
+  group_by(time)%>%
+  summarise_all(funs(mean))
+plot(barc_lw_imputations$time, barc_lw_imputations$LongWave)
+
+#AirTemp
+barc.amelia.at <- amelia(BARC_met, m = 50, polytime = 0, ts = "time", cs = NULL, lags = "AirTemp", leads = "AirTemp")
+barc_at_imputations <- bind_rows(unclass(barc.amelia.at$imputations), .id = "m") %>%
+  select(time, AirTemp)%>%
+  group_by(time)%>%
+  summarise_all(funs(mean))
+plot(barc_at_imputations$time, barc_at_imputations$AirTemp)
+
+#Himidity
+barc.amelia.rh <- amelia(BARC_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "RelHum", leads = "RelHum")
+barc_rh_imputations <- bind_rows(unclass(barc.amelia.rh$imputations), .id = "m") %>%
+  select(time, RelHum)%>%
+  group_by(time)%>%
+  summarise_all(funs(mean))%>%
+  mutate(RelHum = ifelse(RelHum >= 100, 100, RelHum))
+plot(barc_rh_imputations$time, barc_rh_imputations$RelHum)
+
+barc_imputed <- left_join(barc_sw_imputations, barc_lw_imputations, by = "time")%>%
+  left_join(., barc_at_imputations, by = "time")%>%
+  left_join(., barc_rh_imputations, by = "time")
+
+BARC_met_new <- left_join(BARC_met, barc_imputed, by = "time")
+
+BARC_met_final <- BARC_met_new %>%
+  mutate(ShortWave.x = ifelse(is.na(ShortWave.x), ShortWave.y, ShortWave.x))%>%
+  mutate(LongWave.x = ifelse(is.na(LongWave.x), LongWave.y, LongWave.x))%>%
+  mutate(AirTemp.x = ifelse(is.na(AirTemp.x), AirTemp.y, AirTemp.x))%>%
+  mutate(RelHum.x = ifelse(is.na(RelHum.x), RelHum.y, RelHum.x))%>%
+  select(time, ShortWave.x, LongWave.x, AirTemp.x, RelHum.x, WindSpeed, Rain)%>%
+  rename(ShortWave = ShortWave.x, LongWave = LongWave.x, AirTemp = AirTemp.x, RelHum = RelHum.x)
+
+vis_miss(BARC_met_final, sort_miss = F) 
 
 
-compare.density(barc.amelia.sw, var = "ShortWave")
 
 
-tscsPlot(barc.amelia, ts = "time", cs = NULL, var = "AirTemp", ylim = c(-5, 40))
 
 
-FL_met_models <- left_join(BARC_met, SUGG_met, by = "time")%>%
-  left_join(., OSBS_met, by = "time")
 
 # SUGG AirTemp
 sugg_fit_at_1 <- lm(AirTemp.y ~ AirTemp.x+AirTemp, data = FL_met_models)
