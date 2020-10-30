@@ -3,7 +3,7 @@
 #*                                                               *
 #* TITLE:   Observed data download                               *
 #* AUTHOR:  Ryan McClure                                         *
-#* DATE:    08Oct2020                                            *
+#* DATE:    30Oct2020                                            *
 #* PROJECT: CIBR                                                 *
 #* PURPOSE: Downlad the met data and get it in a GLM format      *
 #*****************************************************************
@@ -41,6 +41,9 @@ lapply(water_var_product, neonstore::neon_download, site = lake_sites,
 
 
 # Unpack the stored files to be accessible in R
+
+# This NEEDS TO BE RUN BEFORE RUNNING NEON_TABLE
+
 neonstore::neon_store(table = "dep_secchi-basic")
 neonstore::neon_store(table = "sdg_externalLabData-expanded")
 neonstore::neon_store(table = "swc_externalLabDataByAnalyte-expanded")

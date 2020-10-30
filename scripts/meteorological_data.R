@@ -3,7 +3,7 @@
 #*                                                               *
 #* TITLE:   Neon data collation and comparisons                  *
 #* AUTHOR:  Ryan McClure                                         *
-#* DATE:    11Oct2020                                            *
+#* DATE:    30Oct2020                                            *
 #* PROJECT: CIBR                                                 *
 #* PURPOSE: Download the met data and get it in a GLM format     *
 #*****************************************************************
@@ -50,6 +50,10 @@ neonstore::neon_download(product = water_product, site = lake_sites)
 # -----------------------------------------------------------------------------------------------------------------
 # Make the stored NEON data product a data table in R
 # -----------------------------------------------------------------------------------------------------------------
+
+# Unpack the stored files to be accessible in R
+
+# This NEEDS TO BE RUN BEFORE RUNNING NEON_TABLE
 
 neonstore::neon_store(table = "RH_30min-expanded")
 neonstore::neon_store(table = "SAAT_30min-expanded")
