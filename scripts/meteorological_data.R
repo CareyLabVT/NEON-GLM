@@ -15,6 +15,7 @@ pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo)
 
 # Bypass the latest CRAN version of neonstore and use Carl's most recent Github push
 remotes::install_github("cboettig/neonstore")
+remotes::install_github("cwida/duckdb/tools/rpkg", build= FALSE)
 # -----------------------------------------------------------------------------------------------------------------
 
 # Download and load duckdb_r
@@ -44,7 +45,7 @@ water_product = c("DP1.20267.001", "DP1.20261.001", "DP1.20042.001", "DP1.20163.
 # -----------------------------------------------------------------------------------------------------------------
 
 # Download met products
-neonstore::neon_download(product = met_products, site = sites_all)
+neonstore::neon_download(product = met_products, site = stream_site)
 
 # Download water products
 neonstore::neon_download(product = water_product, site = stream_site)
