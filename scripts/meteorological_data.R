@@ -32,6 +32,8 @@ lake_sites = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
 
 tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE", "TOOK")
 
+stream_site <- "POSE"
+
 met_products = c("DP1.00098.001", "DP1.00002.001", "DP1.00023.001", "DP1.00006.001", "DP1.00001.001")
 
 water_product = c("DP1.20267.001", "DP1.20261.001", "DP1.20042.001", "DP1.20163.001", "DP1.20252.001", 
@@ -45,7 +47,7 @@ water_product = c("DP1.20267.001", "DP1.20261.001", "DP1.20042.001", "DP1.20163.
 neonstore::neon_download(product = met_products, site = sites_all)
 
 # Download water products
-neonstore::neon_download(product = water_product, site = lake_sites)
+neonstore::neon_download(product = water_product, site = stream_site)
 
 # -----------------------------------------------------------------------------------------------------------------
 # Make the stored NEON data product a data table in R
