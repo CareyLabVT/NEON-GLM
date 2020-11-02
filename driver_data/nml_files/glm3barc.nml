@@ -44,8 +44,8 @@
 /
 &time
    timefmt = 2
-   start = '2018-01-01 00:00:00'
-   stop = '2020-07-31 12:00:00'
+   start = '2017-08-27 00:00:00'
+   stop = '2020-10-01 00:00:00'
    dt = 3600
    num_days = 1
    timezone = -5
@@ -72,7 +72,7 @@
 /
 &meteorology
    met_sw = .true.
-   lw_type = 'LW_NET'
+   lw_type = 'LW_IN'
    rain_sw = .true.
    atm_stab = 0
    catchrain = .true.
@@ -80,7 +80,7 @@
    albedo_mode = 1
    cloud_mode = 1
    fetch_mode = 1
-   meteo_fl = 'driver_data/Barco_met_hourly_GMT.csv'
+   meteo_fl = 'driver_data/met_data/BARC_met_hourly.csv'
    subdaily = .true.
    wind_factor = 1
    sw_factor = 1.2  !0.85293943!0.839275117!1.029799837
