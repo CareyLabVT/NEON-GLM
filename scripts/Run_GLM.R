@@ -24,8 +24,9 @@ nml_file <- paste0("./driver_data/nml_files/glm3barc.nml")  #glm3sugg.nml #glm3c
 nml <- read_nml(nml_file) 
 print(nml)
 
-##### run the model! #######
+##### run glm_aed #######
 system(paste0("./glm_aed/glm.exe"))
+
 nc_file <- file.path(sim_folder, 'output/output.nc') #defines the output.nc file 
 
 field_file<-file.path('./observations/CleanedObsTempBARC.csv')
