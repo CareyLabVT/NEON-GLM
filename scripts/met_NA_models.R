@@ -451,14 +451,14 @@ TOOK_met_final <- TOOK_met_new %>%
 # Save each data frame as a .csv that can be executed in the .nml files
 ##################################################################
 
-write_csv(BARC_met_final, "./driver_data/BARC_met_hourly.csv")
-write_csv(SUGG_met_final, "./driver_data/SUGG_met_hourly.csv")
+write_csv(BARC_met_final, "./driver_data/met_data/BARC_met_hourly.csv")
+write_csv(SUGG_met_final, "./driver_data/met_data/SUGG_met_hourly.csv")
 
-write_csv(CRAM_met_final, "./driver_data/CRAM_met_hourly.csv")
-write_csv(LIRO_met_final, "./driver_data/LIRO_met_hourly.csv")
+write_csv(CRAM_met_final, "./driver_data/met_data/CRAM_met_hourly.csv")
+write_csv(LIRO_met_final, "./driver_data/met_data/LIRO_met_hourly.csv")
 
-write_csv(PRPO_met_final, "./driver_data/PRPO_met_hourly.csv")
-write_csv(PRLA_met_final, "./driver_data/PRLA_met_hourly.csv")
+write_csv(PRPO_met_final, "./driver_data/met_data/PRPO_met_hourly.csv")
+write_csv(PRLA_met_final, "./driver_data/met_data/PRLA_met_hourly.csv")
 
-write_csv(TOOK_met_final, "./driver_data/TOOK_met_hourly.csv")
+write_csv(TOOK_met_final, "./driver_data/met_data/TOOK_met_hourly.csv")
 ##################################################################
