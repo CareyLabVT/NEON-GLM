@@ -22,13 +22,14 @@ pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, 
 
 sim_folder <- getwd()
 
+
 #look at the .nml files to confirm the model run
 nml_file <- paste0(sim_folder,"/glm3.nml")
 nml <- read_nml(nml_file) 
 print(nml)
 
 ##### run glm_aed ######
-system(sim_folder,"/","glm.exe", intern = T, ignore.stdout = T, ignore.stderr = T, wait = T)
+system(paste0(sim_folder,"/","glm.exe"))
 
 nc_file <- file.path(sim_folder, 'output/output.nc') #defines the output.nc file 
 
