@@ -102,19 +102,19 @@ airtemp_towers <- neonstore::neon_table(table = "SAAT_30min-expanded", site = to
 
 # Radiation
 radiation_lakes <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = lake_sites) %>%
-  select(endDateTime, inSWMean, outLWMean, siteID) %>%
+  select(endDateTime, inSWMean, inLWMean, siteID) %>%
   mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
   select(-endDateTime)%>%
   group_by(time, siteID) %>%
-  summarize_at(c("inSWMean", "outLWMean"), mean, na.rm = TRUE)%>%
+  summarize_at(c("inSWMean", "inLWMean"), mean, na.rm = TRUE)%>%
   arrange(siteID, time)
 
 radiation_towers <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = tower_sites) %>%
-  select(endDateTime, inSWMean, outLWMean, siteID) %>%
+  select(endDateTime, inSWMean, inLWMean, siteID) %>%
   mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
   select(-endDateTime)%>%
   group_by(time, siteID) %>%
-  summarize_at(c("inSWMean", "outLWMean"), mean, na.rm = TRUE)%>%
+  summarize_at(c("inSWMean", "inLWMean"), mean, na.rm = TRUE)%>%
   arrange(siteID, time)
 
 
