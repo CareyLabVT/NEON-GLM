@@ -24,8 +24,10 @@ download.file("https://github.com/cwida/duckdb/releases/download/master-builds/d
 install.packages("duckdb_r_src.tar.gz", repo = NULL)
 
 neonstore::neon_dir()
-Sys.setenv(NEONSTORE_HOME = "/groups/rqthomas_lab/neonstore")
+Sys.setenv("NEONSTORE_HOME" = "/groups/rqthomas_lab/neonstore")
+Sys.unsetenv("NEONSTORE_HOME")
 neonstore::neon_dir()
+
 
 sites_all = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM", "OSBS", "TOOL", "DCFS", "UNDE")
 
@@ -101,7 +103,7 @@ airtemp_towers <- neonstore::neon_table(table = "SAAT_30min-expanded", site = to
   arrange(siteID, time)
 
 # Radiation
-radiation_lakes <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = lake_sites) %>%
+radiation_lakes <- neonstore::neon_read(table = "SLRNR_30min-expanded", site = lake_sites) %>%
   select(endDateTime, inSWMean, inLWMean, siteID) %>%
   mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
   select(-endDateTime)%>%
@@ -109,7 +111,7 @@ radiation_lakes <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = 
   summarize_at(c("inSWMean", "inLWMean"), mean, na.rm = TRUE)%>%
   arrange(siteID, time)
 
-radiation_towers <- neonstore::neon_table(table = "SLRNR_30min-expanded", site = tower_sites) %>%
+radiation_towers <- neonstore::neon_read(table = "SLRNR_30min-expanded", site = tower_sites) %>%
   select(endDateTime, inSWMean, inLWMean, siteID) %>%
   mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
   select(-endDateTime)%>%
@@ -186,12 +188,12 @@ windspeed_towers <- neonstore::neon_table(table = "2DWSD_30min-expanded", site =
 NEON_met_data_hourly <- left_join(radiation_lakes, windspeed_lakes, by=c('time','siteID')) %>%
   left_join(., humidity_lakes, by=c('time','siteID'))%>%
   left_join(., airtemp_lakes, by=c('time','siteID'))%>%
-  select(time,siteID,inSWMean,outLWMean,tempSingleMean,RHMean,windSpeedMean)
+  select(time,siteID,inSWMean,inLWMean,tempSingleMean,RHMean,windSpeedMean)
 
 NEON_met_data_hourly_towers <- left_join(radiation_towers, windspeed_towers, by=c('time','siteID')) %>%
   left_join(., humidity_towers, by=c('time','siteID'))%>%
   left_join(., airtemp_towers, by=c('time','siteID'))%>%
-  select(time,siteID,inSWMean,outLWMean,tempSingleMean,RHMean,windSpeedMean)
+  select(time,siteID,inSWMean,inLWMean,tempSingleMean,RHMean,windSpeedMean)
 
 NEON_met_data_hourly_all <- bind_rows(NEON_met_data_hourly, NEON_met_data_hourly_towers)
 # -----------------------------------------------------------------------------------------------------------------
@@ -201,7 +203,7 @@ BARC_met <- NEON_met_data_hourly_all %>% filter(siteID == c("BARC")) %>%
   left_join(., precip_barc, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,
@@ -212,7 +214,7 @@ SUGG_met <- NEON_met_data_hourly_all %>% filter(siteID == c("SUGG")) %>%
   left_join(., precip_sugg, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,
@@ -223,7 +225,7 @@ OSBS_met <- NEON_met_data_hourly_all %>% filter(siteID == c("OSBS")) %>%
   left_join(., precip_sugg, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,
@@ -235,7 +237,7 @@ PRPO_met <- NEON_met_data_hourly_all %>% filter(siteID == c("PRPO")) %>%
   left_join(., precip_prpo, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,
@@ -246,7 +248,7 @@ PRLA_met <- NEON_met_data_hourly_all %>% filter(siteID == c("PRLA")) %>%
   left_join(., precip_prla, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,
@@ -258,7 +260,7 @@ CRAM_met <- NEON_met_data_hourly_all %>% filter(siteID == c("CRAM")) %>%
   left_join(., precip_cram, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,
@@ -269,7 +271,7 @@ LIRO_met <- NEON_met_data_hourly_all %>% filter(siteID == c("LIRO")) %>%
   left_join(., precip_liro, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,
@@ -280,7 +282,7 @@ TOOK_met <- NEON_met_data_hourly_all %>% filter(siteID == c("TOOK")) %>%
   left_join(., precip_took, by=c('time', "siteID"))%>%
   select(-siteID)%>%
   rename(ShortWave = inSWMean, 
-         LongWave = outLWMean, 
+         LongWave = inLWMean, 
          AirTemp = tempSingleMean, 
          RelHum = RHMean, 
          Rain = secPrecipBulk,

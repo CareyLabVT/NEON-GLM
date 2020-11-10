@@ -1,0 +1,96 @@
+
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <title>The General Lake Model (GLM)</title>
+
+        <link rel="stylesheet" href="../../css/styles.css">
+        <link rel="stylesheet" href="../../css/pygment_trac.css">
+        <link rel="stylesheet" href="../../css/leaflet.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <!--[if lt IE 9]>
+          <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="wrapper">
+            <section>
+
+                <h1>GLM DOWNLOAD</h1>
+                <p>General Lake Model</p>
+                <p><div style="text-align: left"><a href="https://aquatic.science.uwa.edu.au/research/models/GLM/"><img src = "../Images/glm-icon.png" width = "50" ></a></div>
+                <div style="text-align: left"> 
+                v3.1/glm_3.1.0a4-0_amd64.deb.gz                </div></p>
+                <br>
+                <h3> <strong> Download
+                   Binaries                                         for GLM</strong></h3 >
+                <br>                        
+                <h2>DISCLAIMER AND COPYRIGHT NOTICE</h2>
+
+                By downloading the software you agree to the following terms: <br><br><br>
+                <ul>
+                  <em>The University of Western Australia has developed the code with reasonable care and skill, however, the authors
+                      do not make or imply any warranty as to the quality of simulated output from the software supplied. Nor do the
+                      authors accept any responsibility for the use of the model including any advice or information which the user
+                      may give, or opinions which they express, arising from model simulated output.<br><br>
+                </em></ul>
+
+                      <br>
+                <style>
+                  table {
+                    initial;
+                  }
+                  th, td {
+                    initial;
+                    text-align:center;
+                    padding:5px 10px;
+                  }
+                </style>
+
+                
+                        <form name = "input"  method = "post">
+                            <label> email: </label>
+                            <input type = "text" name = 'email'  required = "required" >
+                            <input type = "submit" name = "submit1" id = "submit1" value = "ACCEPT" >
+                        </form>
+                        <br><br>
+
+                                                <hr><ul><em>
+                          The below model download links for Windows, Macintosh or Ubuntu are acitve after clicking "Accept".<BR>
+                        </em></ul>
+                <table border=0 width="80%" align=center>
+<tr align=center><th colspan=2>Binaries</th></tr>
+<tr><th align=center colspan=2><BR></th></tr>
+<tr><th align=center colspan=2>Examples</th></tr>
+<tr><th align=center colspan=2><BR></th></tr>
+</table>
+                        <hr><ul><em>
+                           Download the binaries appropriate to your system, and unpack them. Refer to the main  <a href="https://aquatic.science.uwa.edu.au/research/models/GLM/">GLM</a> pages for more information.<BR>
+                           <br>
+                           Please cite the GLM paper in publications arising from your use of this model:<BR>
+                           <br>
+                           <small>
+                           Hipsey, M.R., Bruce, L.C., Boon, C., Busch, B., Carey, C.C., Hamilton, D.P., Hanson, P.C., Read, J.S., de Sousa, E., Weber, M. and Winslow, L.A. (2019). <a href="https://www.geosci-model-dev.net/12/473/2019/">A General Lake Model (GLM 3.0) for linking with high-frequency sensor data from the Global Lake Ecological Observatory Network (GLEON)</a>, Geosci. Model Dev., 12(1), 473-523.
+                           </small>
+                           <br>
+                        </em></ul>
+                        <br>
+                      
+                        <h2> ALTERNATE VERSIONS </h2><br>
+                        <p>Click here for <a href="downloader.php?bin&version=3.0">v3.0</a></p>
+                        <p>Click here for <a href="downloader.php?bin&version=2.4">v2.4</a></p>
+                        <p>Click here for <a href="downloader.php?bin&version=2.2">v2.2</a></p>
+                        <p>Click here for <a href="downloader.php?bin&version=2.0">v2.0</a></p>
+                        <p>Click here for <a href="downloader.php?bin&version=1.4">v1.4</a></p>
+                        <br><br>
+                  </section>
+            <footer>
+                <p><a href = "https://aquatic.science.uwa.edu.au"><img src = "../../css/aed-transparent-background.png" width = "160"  ></a></p>
+                <small>Theme by <a href="https://github.com/orderedlist">orderedlist</a></small>
+            </footer>
+        </div>
+        <script src="/javascripts/scale.fix.js"></script>
+    </body>
+</html>

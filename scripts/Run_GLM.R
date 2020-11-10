@@ -14,6 +14,9 @@ remotes::install_github("CareyLabVT/GLMr")
 remotes::install_github("CareyLabVT/glmtools")
 remotes::install_github("GLEON/GLM3r")
 
+download.file("https://aquatic.science.uwa.edu.au/research/models/GLM/Download/downloader.php?bin&version=3.1/glm_3.1.0a4-0_amd64.deb.gz", destfile = "./glm_3.1.0a4-0_amd64.deb.gz")
+
+
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, GLMr, glmtools, GLM3r)
 
@@ -24,8 +27,8 @@ nml_file <- paste0(sim_folder,"/glm3.nml")
 nml <- read_nml(nml_file) 
 print(nml)
 
-##### run glm_aed #######
-system(paste0(sim_folder_barc,"/","glm.exe"))
+##### run glm_aed ######
+system(sim_folder,"/","glm.exe", intern = T, ignore.stdout = T, ignore.stderr = T, wait = T)
 
 nc_file <- file.path(sim_folder, 'output/output.nc') #defines the output.nc file 
 
