@@ -17,15 +17,15 @@ remotes::install_github("GLEON/GLM3r")
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, GLMr, glmtools, GLM3r)
 
-sim_folder <- getwd()
+sim_folder_barc <- "C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC"
 
 #look at the .nml files to confirm the model run
-nml_file <- paste0(sim_folder,"/glm3.nml")  #glm3sugg.nml #glm3cram.nml #glm3prpo.nml #glm3prla.nml #glm3took.nml
+nml_file <- paste0(sim_folder_barc,"/glm3.nml")  #glm3sugg.nml #glm3cram.nml #glm3prpo.nml #glm3prla.nml #glm3took.nml
 nml <- read_nml(nml_file) 
 print(nml)
 
 ##### run glm_aed #######
-system(paste0(sim_folder,"/","glm.exe"))
+system(paste0(sim_folder_barc,"/","glm.exe"))
 
 nc_file <- file.path(sim_folder, 'output/output.nc') #defines the output.nc file 
 
