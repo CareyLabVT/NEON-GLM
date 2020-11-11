@@ -82,8 +82,8 @@
    meteo_fl = 'driver_data/met_data/BARC_met_hourly.csv'
    subdaily = .true.
    wind_factor = 1
-   sw_factor = 0.912496757!0.85293943!0.839275117!1.029799837
-   lw_factor = 0.931508286!0.990767156!0.982999002!1.217459018
+   sw_factor = 1   !0.85293943!0.839275117!1.029799837
+   lw_factor = 1.217459018   !0.990767156!0.982999002!1.217459018
    at_factor = 1
    rh_factor = 1
    rain_factor = 1
