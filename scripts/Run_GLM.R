@@ -16,9 +16,9 @@ download.file("https://aquatic.science.uwa.edu.au/research/models/GLM/Download/d
 
 
 if (!require('pacman')) install.packages('pacman'); library('pacman')
-pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, GLMr, glmtools, GLM3r)
+pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, glmtools)
 
-sim_folder <- getwd()
+sim_folder <- "C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC"
 
 
 #look at the .nml files to confirm the model run
