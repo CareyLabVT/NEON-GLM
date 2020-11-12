@@ -18,6 +18,7 @@ vis_miss(BARC_met, sort_miss = F)
 
 BARC_met <- as.data.frame(BARC_met)
 
+
 #ShortWave
 barc.amelia.sw <- amelia(BARC_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "ShortWave", leads = "ShortWave")
 barc_sw_imputations <- bind_rows(unclass(barc.amelia.sw$imputations), .id = "m") %>%
@@ -26,13 +27,23 @@ barc_sw_imputations <- bind_rows(unclass(barc.amelia.sw$imputations), .id = "m")
   summarise_all(funs(mean))%>%
   mutate(ShortWave = ifelse(ShortWave <= 0, 0, ShortWave))
 
+
+plot(barc_sw_imputations$time, barc_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "BARC SW Imputed")
+points(BARC_met$time, BARC_met$ShortWave, cex = 0.7, pch = 19)
+
+compare.density(barc.amelia.sw, var="ShortWave")
+
 #LongWave
 barc.amelia.lw <- amelia(BARC_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "LongWave", leads = "LongWave")
 barc_lw_imputations <- bind_rows(unclass(barc.amelia.lw$imputations), .id = "m") %>%
   select(time, LongWave)%>%
   group_by(time)%>%
   summarise_all(funs(mean))
-plot(barc_lw_imputations$time, barc_lw_imputations$LongWave)
+
+plot(barc_lw_imputations$time, barc_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "BARC LW Imputed")
+points(BARC_met$time, BARC_met$LongWave, cex = 0.7, pch = 19)
+
+compare.density(barc.amelia.lw, var="LongWave")
 
 #AirTemp
 barc.amelia.at <- amelia(BARC_met, m = 50, polytime = 0, ts = "time", cs = NULL, lags = "AirTemp", leads = "AirTemp")
@@ -40,7 +51,9 @@ barc_at_imputations <- bind_rows(unclass(barc.amelia.at$imputations), .id = "m")
   select(time, AirTemp)%>%
   group_by(time)%>%
   summarise_all(funs(mean))
-plot(barc_at_imputations$time, barc_at_imputations$AirTemp)
+
+plot(barc_at_imputations$time, barc_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "BARC AT Imputed")
+points(BARC_met$time, BARC_met$AirTemp, cex = 0.7, pch = 19)
 
 #Himidity
 barc.amelia.rh <- amelia(BARC_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "RelHum", leads = "RelHum")
@@ -49,7 +62,9 @@ barc_rh_imputations <- bind_rows(unclass(barc.amelia.rh$imputations), .id = "m")
   group_by(time)%>%
   summarise_all(funs(mean))%>%
   mutate(RelHum = ifelse(RelHum >= 100, 100, RelHum))
-plot(barc_rh_imputations$time, barc_rh_imputations$RelHum)
+
+plot(barc_rh_imputations$time, barc_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "BARC RH Imputed")
+points(BARC_met$time, BARC_met$RelHum, cex = 0.7, pch = 19)
 
 barc_imputed <- left_join(barc_sw_imputations, barc_lw_imputations, by = "time")%>%
   left_join(., barc_at_imputations, by = "time")%>%
@@ -81,6 +96,9 @@ sugg_sw_imputations <- bind_rows(unclass(sugg.amelia.sw$imputations), .id = "m")
   summarise_all(funs(mean))%>%
   mutate(ShortWave = ifelse(ShortWave <= 0, 0, ShortWave))
 
+plot(sugg_sw_imputations$time, sugg_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "SUGG SW Imputed")
+points(SUGG_met$time, SUGG_met$ShortWave, cex = 0.7, pch = 19)
+
 #LongWave
 sugg.amelia.lw <- amelia(SUGG_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "LongWave", leads = "LongWave")
 sugg_lw_imputations <- bind_rows(unclass(sugg.amelia.lw$imputations), .id = "m") %>%
@@ -88,7 +106,8 @@ sugg_lw_imputations <- bind_rows(unclass(sugg.amelia.lw$imputations), .id = "m")
   group_by(time)%>%
   summarise_all(funs(mean))
 
-plot(sugg_lw_imputations$time, sugg_lw_imputations$LongWave)
+plot(sugg_lw_imputations$time, sugg_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "SUGG LW Imputed")
+points(SUGG_met$time, SUGG_met$LongWave, cex = 0.7, pch = 19)
 
 #AirTemp
 sugg.amelia.at <- amelia(SUGG_met, m = 50, polytime = 0, ts = "time", cs = NULL, lags = "AirTemp", leads = "AirTemp")
@@ -98,7 +117,8 @@ sugg_at_imputations <- bind_rows(unclass(sugg.amelia.at$imputations), .id = "m")
   summarise_all(funs(mean))%>%
   mutate(AirTemp = ifelse(AirTemp >= 38, 38, AirTemp))
 
-plot(sugg_at_imputations$time, sugg_at_imputations$AirTemp)
+plot(sugg_at_imputations$time, sugg_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "SUGG AT Imputed")
+points(SUGG_met$time, SUGG_met$AirTemp, cex = 0.7, pch = 19)
 
 #Himidity
 sugg.amelia.rh <- amelia(SUGG_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "RelHum", leads = "RelHum")
@@ -108,8 +128,8 @@ sugg_rh_imputations <- bind_rows(unclass(sugg.amelia.rh$imputations), .id = "m")
   summarise_all(funs(mean))%>%
   mutate(RelHum = ifelse(RelHum >= 100, 100, RelHum))
 
-plot(SUGG_met$time, SUGG_met$RelHum)
-plot(sugg_rh_imputations$time, sugg_rh_imputations$RelHum)
+plot(sugg_rh_imputations$time, sugg_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "SUGG RH Imputed")
+points(SUGG_met$time, SUGG_met$RelHum, cex = 0.7, pch = 19)
 
 sugg_imputed <- left_join(sugg_sw_imputations, sugg_lw_imputations, by = "time")%>%
   left_join(., sugg_at_imputations, by = "time")%>%

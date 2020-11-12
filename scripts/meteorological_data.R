@@ -15,7 +15,7 @@ pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo)
 
 # Bypass the latest CRAN version of neonstore and use Carl's most recent Github push
 remotes::install_github("cboettig/neonstore")
-remotes::install_github("cwida/duckdb/tools/rpkg", build= FALSE)
+#remotes::install_github("cwida/duckdb/tools/rpkg", build= FALSE)
 # -----------------------------------------------------------------------------------------------------------------
 
 # Download and load duckdb_r
@@ -24,7 +24,7 @@ download.file("https://github.com/cwida/duckdb/releases/download/master-builds/d
 install.packages("duckdb_r_src.tar.gz", repo = NULL)
 
 neonstore::neon_dir()
-Sys.setenv("NEONSTORE_HOME" = "/groups/rqthomas_lab/neonstore")
+Sys.setenv("NEONSTORE_DB" = "/groups/rqthomas_lab/neonstore")
 Sys.unsetenv("NEONSTORE_HOME")
 neonstore::neon_dir()
 
