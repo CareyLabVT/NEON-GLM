@@ -18,21 +18,24 @@ download.file("https://aquatic.science.uwa.edu.au/research/models/GLM/Download/d
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, glmtools)
 
-sim_folder <- "C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC"
+sim_folder <- "C:/Users/Owner/Desktop/NEON-GLM"
 
 
 #look at the .nml files to confirm the model run
-nml_file <- paste0(sim_folder,"/glm3.nml")
+nml_file <- paste0(sim_folder,"/GLM_BARC/glm3.nml")
 nml <- read_nml(nml_file) 
 print(nml)
 
-##### run glm_aed ######
-system(paste0(sim_folder,"/","glm.exe"))
+##### run glm_aed #####
+setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC")
+system(paste0(sim_folder, "/GLM_BARC/glm.exe"))
 
 nc_file <- file.path(sim_folder, 'output/output.nc') #defines the output.nc file 
 
-field_file<-file.path('./observations/CleanedObsTempBARC.csv')
+field_file<-file.path('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv')
 plot_temp_compare(nc_file, field_file)
+
+plot_temp(nc_file)
 
 EPI_RMSE <- compare_to_field(nc_file, field_file, nml_file = nml_file, metric = 'epi.temperature', as_value = F,
                  na.rm = TRUE, precision = 'days',method = 'interp')
