@@ -1,0 +1,4 @@
+wind_factor,sw_factor,lw_factor,coef_mix_conv,coef_wind_stir,coef_mix_shear,coef_mix_turb,coef_mix_KH,coef_mix_hyp,ce,ch,cd,zone_heights,zone_heights,rain_factor,at_factor,rh_factor,sed_temp_mean,sed_temp_mean,sed_temp_amplitude,sed_temp_amplitude,sed_temp_peak_doy,sed_temp_peak_doy
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
