@@ -716,7 +716,7 @@ run_sensitivity <- function(var, max_r, x0, lb, ub, pars, obs, nml_file){
   k.values <- 2:(nrow(morris_cluster)-1)
   mean_ss <- k.values*0
   for (k in k.values){
-    km.res <- kmeans(morris_cluster, centers = k, nstart = 50)
+    km.res <- kmeans(morris_cluster, centers = k, nstart = 25)
     ss <- silhouette(km.res$cluster, dist(morris_cluster))
     mean_ss[k-1] <- mean(ss[, 3])
   }

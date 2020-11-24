@@ -17,7 +17,7 @@ remotes::install_github("CareyLabVT/glmtools")
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, glmtools)
 
-sim_folder <- "C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC"
+sim_folder <- "C:/Users/Owner/Desktop/NEON-GLM"
 
 #look at the .nml files to confirm the model run
 nml_file <- paste0("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/glm3.nml")
@@ -28,32 +28,13 @@ print(nml)
 setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC")
 system(paste0(sim_folder, "/GLM_BARC/glm.exe"))
 
-nc_file <- file.path(sim_folder, '/output/output.nc') #defines the output.nc file 
+nc_file <- file.path('C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/output/output.nc') #defines the output.nc file 
 
 plot_temp(nc_file)
-water_level<-get_surface_height(nc_file, ice.rm = TRUE, snow.rm = TRUE)
-
-
 field_file<-file.path('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv')
-
 plot_temp_compare(nc_file, field_file)
 
-# EPI_RMSE <- compare_to_field(nc_file, field_file, nml_file = nml_file, metric = 'epi.temperature', as_value = F,
-#                  na.rm = TRUE, precision = 'days',method = 'interp')
-# 
-# temps <- resample_to_field(nc_file, field_file, precision="mins", method='interp')
-# 
-# temps<-temps[complete.cases(temps),]
-# 
-# temps_1 <- temps %>% filter(Depth == 1.05)
-# plot(temps_1$DateTime, temps_1$Observed_temp, col = "black", main = " 1m Temperature Mod = red; Obs = black")
-# points(temps_1$DateTime, temps_1$Modeled_temp, col = "red")
-# 
-# 
-# 
-# #get water level
-# water_level<-get_surface_height(nc_file, ice.rm = TRUE, snow.rm = TRUE)
-# plot(water_level$DateTime,water_level$surface_height, ylim = c(5,9), main = "Barco!")
-# lines(as.POSIXct(water_level_barc$DateTime),water_level_barc$surface_height, type = "p", ylim = c(5,9), col = "red")
-# 
+
+
+
 

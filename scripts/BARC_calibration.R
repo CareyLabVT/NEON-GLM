@@ -21,7 +21,7 @@ sim_vars(out)
 
 sim_folder<-getwd()
 
-#run_glm('Compiled') #pulling from Cayelan's version
+run_glm('Compiled') #pulling from Cayelan's version
 plot_temp(out, col_lim = c(0,35))
 #plot_var(file=out,"OXY_oxy",reference="surface")
 
@@ -90,6 +90,35 @@ run_sensitivity(var, max_r, x0, lb, ub, pars, obs, nml_file)
 
 
 
+
+var = 'temp'
+calib <- read.csv(paste0('calibration_file_',var,'.csv'), stringsAsFactors = F)
+cal_pars = calib
+#Reload ub, lb for calibration
+pars <- cal_pars$par
+ub <- cal_pars$ub
+lb <- cal_pars$lb
+#Create initial files
+#init.val <- rep(5, nrow(cal_pars))
+init.val <- (c(1,1,0.5, 0.0013,4,7,11,17,265,275) - lb) *10 /(ub-lb) # NEEDS TO BE UPDATED WITH STARTING VALUES FROM YOUR CALIBRATION FILE
+obs <- read_field_obs('field_data/CleanedObsTemp.csv', var)
+method = 'cmaes'
+calib.metric = 'RMSE'
+os = 'Compiled' #Changed from Unix
+target_fit = -Inf#1.55
+target_iter = 500 #1000*length(init.val)^2
+nml_file = 'glm3.nml'
+run_calibvalid(var, var_unit = 'degreesC', var_seq = seq(-5,35,1), cal_pars, pars, ub, lb, init.val, obs, method, 
+               calib.metric, os, target_fit, target_iter, nml_file, flag = c()) #var_seq is contour color plot range
+
+
+#to visualize how params can converge
+par(mfrow=c(3,4))
+data<-read.csv("results/calib_results_RMSE_temp.csv", header=T)
+temp<-seq(1,length(data$DateTime),1)
+for(i in 1:length(init.val)){
+  plot(temp,data[,i+1],type="l",xlab="Iteration", ylab=(colnames(data[i+1])))
+}
 
 #' # 2) dissolved oxygen
 #' file.copy('glm4.nml', 'glm3.nml', overwrite = TRUE)
