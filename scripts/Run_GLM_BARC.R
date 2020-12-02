@@ -17,8 +17,6 @@ remotes::install_github("CareyLabVT/glmtools")
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, glmtools)
 
-sim_folder <- "C:/Users/Owner/Desktop/NEON-GLM"
-
 #look at the .nml files to confirm the model run
 nml_file <- paste0("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/glm3.nml")
 nml <- read_nml(nml_file) 
@@ -29,6 +27,13 @@ setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC")
 system(paste0(sim_folder, "/GLM_BARC/glm.exe"))
 
 nc_file <- file.path('C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/output/output.nc') #defines the output.nc file 
+
+water_height <- get_surface_height(file = out_file)
+ggplot(water_height, aes(DateTime, surface_height)) +
+  geom_line() +
+  ggtitle('Surface water level') +
+  xlab(label = '') + ylab(label = 'Water level (m)') +
+  theme_minimal()
 
 plot_temp(nc_file)
 field_file<-file.path('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv')

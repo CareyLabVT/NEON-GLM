@@ -1,5 +1,5 @@
 &glm_setup
-   sim_name = 'BARC'
+   sim_name = 'SUGG'
    max_layers = 500
    min_layer_vol = 0.025
    min_layer_thick = 0.15
@@ -33,7 +33,7 @@
    coef_mix_shreq = 0
 /
 &morphometry
-   lake_name = 'BarcoLake'
+   lake_name = 'SuggLake'
    latitude = 29.675621
    longitude = -82.008501
    bsn_len = 422

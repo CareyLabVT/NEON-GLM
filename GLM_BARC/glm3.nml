@@ -73,17 +73,17 @@
    cloud_mode = 4
    meteo_fl = 'BARC_met_hourly.csv'
    subdaily = .true.
-   wind_factor = 1.246766
+   wind_factor = 1
    sw_factor = 1
-   lw_factor = 0.94718
+   lw_factor = 1
    at_factor = 1
    rh_factor = 1
-   rain_factor = 1
+   rain_factor = 0.1
    cd = 0.0013
    ce = 0.0013
    ch = 0.0017422255407989, 0.555200092035785
-   rain_threshold = 0.04
-   runoff_coef = 0.2
+   rain_threshold = 0.01
+   runoff_coef = 0.1
    time_fmt = 'YYYY-MM-DD hh:mm:ss'
 /
 &inflow
@@ -92,7 +92,7 @@
 &outflow
    num_outlet = 0
    seepage = .true.
-   seepage_rate = 0.0006
+   seepage_rate = 0.0001
 /
 &snowice
    snow_albedo_factor = 1
