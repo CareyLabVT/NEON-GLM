@@ -1,33 +1,30 @@
 #*****************************************************************
 #*                  CareyLabVT Blacksburg, VA USA                *
 #*                                                               *
-#* TITLE:   BARCO GLM CALIBRATION                                *
+#* TITLE:   GLM CALIBRATION FOR NEON LAKES                       *
 #* AUTHOR:  Robert Ladwig and updated by Ryan McClure            *
 #* DATE:    17Nov2020                                            *
 #* PROJECT: CIBR                                                 *
 #* PURPOSE: RUN GLM-AED for the NEON lake sites and calibrate    *
 #*****************************************************************
-source('C:/Users/Owner/Desktop/NEON-GLM/scripts/calib_helpers.R') 
-
-#### Workshop setup ####
-cat("\f")
-rm(list = ls())
+source('./NEON-GLM/scripts/calib_helpers.R') 
 
 # if you're using Rstudio:
 setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/")
-
-# overview of files for this workshop
-list.files()
+#setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_SUGG/")
+#setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_CRAM/")
+#setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_LIRO/")
+#setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_PRPO/")
+#setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_PRLA/")
+#setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_TOOK/")
 
 # install these packages:
 install.packages("devtools")
 require(devtools)
-devtools::install_github("robertladwig/GLM3r", ref = "v3.1.1")
 remotes::install_github("USGS-R/glmtools")
 
 # we will need these packages
 library(glmtools)
-library(GLM3r)
 library(rLakeAnalyzer)
 library(tidyverse)
 library(adagio)
@@ -62,39 +59,8 @@ library(adagio)
 glm_version()
 wd <- getwd()
 
-#### Example 1: reading the namelist file into R  ####
-glm_template = 'glm3-template.nml' 
-sim_folder <- "C:/Users/Owner/Desktop/NEON-GLM"
-out_file <- file.path(wd, 'output/output.nc')
-field_data<-file.path('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv')
-file.copy(glm_template, 'glm3.nml', overwrite = TRUE)
-nml_file <- file.path(sim_folder, 'glm3.nml')
-
-# read example configuration into memory
-eg_nml <- read_nml(nml_file = file.path(wd,'/glm3.nml'))
-eg_nml
-class(eg_nml)
-names(eg_nml)
-eg_nml[[1]][1:4]
-eg_nml$light
-
-# read and change values inside the namelist file
-kw_1 <- get_nml_value(eg_nml, 'Kw')
-print(kw_1)
-
-eg_nml <- set_nml(eg_nml, 'Kw', 1.4)
-get_nml_value(eg_nml, 'Kw')
-
-# write modified values into namelist file
-write_nml(eg_nml, file = nml_file)
-
-eg_nml <- set_nml(eg_nml, 'Kw', kw_1)
-write_nml(eg_nml, file = nml_file)
-
 #### Example 2: first visualisations ####
 # run GLM
-
-
 system(paste0(wd, "/glm.exe"))
 GLM3r::run_glm(wd, verbose = T)
 

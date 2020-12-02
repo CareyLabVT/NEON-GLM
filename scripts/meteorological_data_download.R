@@ -24,33 +24,24 @@ download.file("https://github.com/cwida/duckdb/releases/download/master-builds/d
 install.packages("duckdb_r_src.tar.gz", repo = NULL)
 
 neonstore::neon_dir()
-Sys.setenv("NEONSTORE_DB" = "/groups/rqthomas_lab/neonstore")
+Sys.setenv("NEONSTORE_HOME" = "/groups/rqthomas_lab/neonstore")
 Sys.unsetenv("NEONSTORE_HOME")
 neonstore::neon_dir()
 
 
 sites_all = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM", "OSBS", "TOOL", "DCFS", "UNDE")
-
 lake_sites = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
-
 tower_sites = c("OSBS", "TOOL", "DCFS", "UNDE", "TOOK")
-
-stream_site <- "POSE"
 
 met_products = c("DP1.00098.001", "DP1.00002.001", "DP1.00023.001", "DP1.00006.001", "DP1.00001.001")
 
-water_product = c("DP1.20267.001", "DP1.20261.001", "DP1.20042.001", "DP1.20163.001", "DP1.20252.001", 
-                  "DP1.20097.001","DP1.20093.001", "DP1.20033.001", "DP1.20288.001")
 # -----------------------------------------------------------------------------------------------------------------
 
 # Download the newest data from NEON
 # -----------------------------------------------------------------------------------------------------------------
 
 # Download met products
-neonstore::neon_download(product = met_products, site = stream_site)
-
-# Download water products
-neonstore::neon_download(product = water_product, site = stream_site)
+neonstore::neon_download(product = met_products, site = lake_sites)
 
 # -----------------------------------------------------------------------------------------------------------------
 # Make the stored NEON data product a data table in R
@@ -59,13 +50,7 @@ neonstore::neon_download(product = water_product, site = stream_site)
 # Unpack the stored files to be accessible in R
 
 # This NEEDS TO BE RUN BEFORE RUNNING NEON_TABLE
-
-neonstore::neon_store(table = "RH_30min-expanded")
-neonstore::neon_store(table = "SAAT_30min-expanded")
-neonstore::neon_store(table = "SLRNR_30min-expanded")
-neonstore::neon_store(table = "SECPRE_30min-expanded")
-neonstore::neon_store(table = "2DWSD_2min-expanded")
-
+Sys.setenv("NEONSTORE_DB" = "/groups/rqthomas_lab/neonstore")
 #The data are too large to pullin all at once and to compartmentalize. Thus, I have pulled each site in individually
 
 # Humidity
@@ -166,7 +151,8 @@ precip_took <- precip %>%
   filter(siteID == "TOOK")
 
 # Windspeed
-windspeed_lakes <- neonstore::neon_table(table = "2DWSD_30min-expanded", site = lake_sites)%>%
+windspeed_lakes <- neonstore::neon_read(table = "2DWSD_2min-expanded", site = lake_sites)
+#%>%
   mutate(time = lubridate::floor_date(endDateTime, unit = "hour"))%>%
   select(-endDateTime)%>%
   group_by(time, siteID) %>%
