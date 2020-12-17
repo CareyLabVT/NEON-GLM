@@ -7,7 +7,7 @@
 #* PROJECT: CIBR                                                 *
 #* PURPOSE: RUN GLM-AED for the NEON lake sites and calibrate    *
 #*****************************************************************
-source('./NEON-GLM/scripts/calib_helpers.R') 
+source('C:/Users/Owner/Desktop/NEON-GLM/scripts/calib_helpers.R') 
 
 # if you're using Rstudio:
 setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/")
@@ -28,6 +28,7 @@ library(glmtools)
 library(rLakeAnalyzer)
 library(tidyverse)
 library(adagio)
+library(GLM3r)
 
 # overview of glmtools functions
 #   | Function       | Title           |
@@ -62,23 +63,86 @@ wd <- getwd()
 #### Example 2: first visualisations ####
 # run GLM
 system(paste0(wd, "/glm.exe"))
+
 GLM3r::run_glm(wd, verbose = T)
 
 # visualize change of water table over time
 water_height <- get_surface_height(file = out_file)
+
+obs_water_height <- read_csv("C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_barco.csv")
+obs_water_height$DateTime <- ymd(obs_water_height$DateTime)
+obs_water_height$surface_height <- obs_water_height$surface_height-1
+
 ggplot(water_height, aes(DateTime, surface_height)) +
   geom_line() +
   ggtitle('Surface water level') +
+  geom_point(data = obs_water_height, aes(as.POSIXct(DateTime), surface_height))+
   xlab(label = '') + ylab(label = 'Water level (m)') +
   theme_minimal()
 
-# visualize ice formation over time
-ice_thickness <- get_ice(file = out_file)
-ggplot(ice_thickness, aes(DateTime, `ice(m)`)) +
-  geom_line() +
-  ggtitle('Ice') +
-  xlab(label = '') + ylab(label = 'Ice thickness (m)') +
-  theme_minimal()
+volume <- get_var(var = 'Tot_V', file = out_file)
+plot(volume)
+
+#### Example 3: calibrating water volume parameters ####
+
+var = 'Tot_V'         # variable to which we apply the calibration procedure
+var_name = 'Tot_V'
+path = getwd()       # simulation path/folder
+nml_file = nml_file  # path of the nml configuration file that you want to calibrate on
+glm_file = nml_file # # path of the gml configuration file
+# which parameter do you want to calibrate? a sensitivity analysis helps
+calib_setup <- data.frame('pars' = as.character(c('wind_factor','lw_factor','ch','sed_temp_mean',
+                                                  'sed_temp_mean',
+                                                  'coef_mix_hyp','Kw','seepage_rate','rain_factor','rain_threshold','rh_factor')),
+                          
+                          'lb' = c(0.7,0.7,5e-4,3,8,0.6,0.1,1e-8,0.5,0.001,0.8),
+                          'ub' = c(2,2,0.002,8,20,0.4,0.8,1e-2,1.5,0.1,1.2),
+                          'x0' = c(1,1,0.0013,5,13,0.5,0.3,1e-4,1,0.01,1))
+print(calib_setup)
+glmcmd = system(paste0(wd, "/glm.exe")) # command to be used, default applies the GLM3r function
+glmcmd = NULL
+
+# Optional variables
+first.attempt = T # if TRUE, deletes all local csv-files that stores the 
+#outcome of previous calibration runs
+period = get_calib_periods(nml_file, ratio = 20) # define a period for the calibration, 
+# this supports a split-sample calibration (e.g. calibration and validation period)
+# the ratio value is the ratio of calibration period to validation period
+print(period)
+scaling = TRUE       # scaling of the variables in a space of [0,10]; TRUE for CMA-ES
+verbose = TRUE
+method = 'CMA-ES'    # optimization method, choose either `CMA-ES` or `Nelder-Mead`
+metric = 'RMSE'      # objective function to be minimized, here the root-mean square error
+target.fit = 2.0     # refers to a target fit of 2.0 degrees Celsius (stops when RMSE is below that)
+target.iter = 20    # refers to a maximum run of 20 calibration iterations (stops after that many runs)
+plotting = TRUE      # if TRUE, script will automatically save the contour plots
+output = out_file    # path of the output file
+field_file = field_data # path of the field data
+conversion.factor = 1 # conversion factor for the output, e.g. 1 for water temp.
+
+field_data <- "C:/Users/Owner/Desktop/NEON-GLM/observations/volume_barco.csv"
+
+calibrate_sim(var = 'Tot_V', path = wd, 
+              field_file = field_data, 
+              nml_file = "C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/glm3.nml", 
+              calib_setup = calib_setup, 
+              glmcmd = system(paste0(wd, "/glm.exe")), first.attempt = TRUE, 
+              period = period, 
+              scaling = TRUE, method = 'CMA-ES', metric = 'RMSE', 
+              target.fit = 2.0, target.iter = 40, 
+              plotting = TRUE, 
+              output = output, 
+              verbose = TRUE)
+
+
+temp_rmse <- compare_to_field(nc_file = out_file, 
+                              field_file = field_data,
+                              metric = 'water.temperature', 
+                              as_value = FALSE, 
+                              precision= 'hours')
+
+print(paste('BARCO calibration period:',round(temp_rmse,2),'deg C RMSE'))
+
 
 # visualize change of surface water temp. over time
 surface_temp <- get_var(file = out_file, 
@@ -128,9 +192,6 @@ ggplot(td_df, aes(datetime, thermo.depth)) +
   theme_minimal()
 
 #### Example 3: calibrating water temperature parameters ####
-
-
-
 
 var = 'temp'         # variable to which we apply the calibration procedure
 path = getwd()       # simulation path/folder
