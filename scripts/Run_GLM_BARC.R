@@ -23,19 +23,27 @@ nml <- read_nml(nml_file)
 print(nml)
 
 ##### run glm_aed #####
+glm_version()
 setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC")
 system(paste0(sim_folder, "/GLM_BARC/glm.exe"))
 
 nc_file <- file.path('C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/output/output.nc') #defines the output.nc file 
 
 water_height <- get_surface_height(file = out_file)
+
+obs_water_height <- read_csv("C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_barco.csv")
+obs_water_height$DateTime <- ymd(obs_water_height$DateTime)
+obs_water_height$surface_height <- obs_water_height$surface_height-1
+
 ggplot(water_height, aes(DateTime, surface_height)) +
   geom_line() +
   ggtitle('Surface water level') +
+  geom_point(data = obs_water_height, aes(as.POSIXct(DateTime), surface_height))+
   xlab(label = '') + ylab(label = 'Water level (m)') +
   theme_minimal()
 
 plot_temp(nc_file)
+
 field_file<-file.path('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv')
 plot_temp_compare(nc_file, field_file)
 

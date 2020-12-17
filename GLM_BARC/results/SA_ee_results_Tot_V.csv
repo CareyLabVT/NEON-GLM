@@ -1,0 +1,4 @@
+wind_factor,sw_factor,lw_factor,coef_mix_conv,coef_wind_stir,coef_mix_shear,coef_mix_turb,coef_mix_KH,coef_mix_hyp,ce,ch,cd,rain_factor,at_factor,rh_factor,rain_threshold,runoff_coef,seepage_rate
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+56187259710.0543,0,0,0,0,0,0,1245313354.50521,0,0,0,0,0,0,0,0,0,94174543274203.3
