@@ -11,45 +11,44 @@
 rm(list = ls()) #let's clean up that workspace!
 
 setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC")
-source('C:/Users/Owner/Desktop/NEON-GLM/scripts/functions-glm.R') #source the helper functions
+source('C:/Users/Owner/Desktop/NEON-GLM/scripts/functions-glm_rpm.R') #source the helper functions
 read.packages() 
 
 # RUN GLM AND READ RESULTS  ---------------------------
-filename = 'BARC'
+filename = 'BARCO'
 out = 'output/output.nc' 
 sim_vars(out)
+#os = "Original"
 
 sim_folder<-getwd()
 
-run_glm('Compiled') #pulling from Cayelan's version
-plot_temp(out, col_lim = c(0,35))
-#plot_var(file=out,"OXY_oxy",reference="surface")
+#run_glm("Original") #pulling from Cayelan's version
+system("./glm")
+plot_temp(out, col_lim = c(0,40))
+plot_var(file=out,"Tot_V",reference="surface")
 
 # GET FIELD DATA FOR CALIBRATION AND VALIDATION  ---------------------------
-# WTR AND OXY DATA
-field_temp<-read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv', header=T)
-#field_oxy <-read.csv("field_data/CleanedObsOxy1.csv", header=T)
-field_temp$DateTime <-as.POSIXct(strptime(field_temp$DateTime, "%Y-%m-%d", tz="EST"))
-#field_oxy$DateTime <-as.POSIXct(strptime(field_oxy$DateTime, "%Y-%m-%d", tz="EST"))
+# WTR | VOLUME | SURFACE HEIGHT DATA
 
-# CHEMISTRY: GET ALL NUTRIENTS, SILICA, CH4, & CO2
-# chem <- read.csv('field_data/field_chem.csv', header=T)
-# chem$DateTime <-as.POSIXct(strptime(chem$DateTime, "%Y-%m-%d", tz="EST"))
-# silica<-read.csv('field_data/field_silica.csv', header=T)
-# silica$DateTime <-as.POSIXct(strptime(silica$DateTime, "%Y-%m-%d", tz="EST"))
-# gases<-read.csv('field_data/field_gases.csv', header=T)
-# gases$DateTime <-as.POSIXct(strptime(gases$DateTime, "%Y-%m-%d", tz="EST"))
+field_temp<-read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv', header=T)
+
+field_surface_height <- read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_barco.csv', header=T)
+
+field_volume<- read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/volume_barco.csv', header=T)
+field_volume <- field_volume %>% mutate(Depth = NA) %>%
+  select(DateTime, Depth, Tot_V)
+write.csv(field_volume, 'volume_barco.csv')
 
 
 #######################################################
 # RUN SENSITIVITY ANALYSIS  ---------------------------
-# 1) water temperature, following ISIMIP approach
+# 1) water volume, following ISIMIP approach
 #first, copy & paste your glm3.nml and aed2.nml within their respective directories
 # and rename as glm4.nml and aed4.nml; these 4.nml versions are going to be rewritten
 file.copy('glm4.nml', 'glm3.nml', overwrite = TRUE)
-#file.copy('aed2/aed4_20200701_2DOCpools.nml', 'aed2/aed2_20200701_2DOCpools.nml', overwrite = TRUE)
-#file.copy('aed2/aed4_1OGMpool_27Aug2019.nml', 'aed2/aed2_1OGMpool_27Aug2019.nml', overwrite = TRUE)
-var = 'temp'
+var = 'Tot_V'
+var_name = 'Tot_V'
+
 calib <- matrix(c('par', 'lb', 'ub', 'x0', #THIS LIST WILL BE EDITED BUT START WITH ALL VARS
                   'wind_factor', 0.75, 1.25, 1,
                   'sw_factor', 0.75, 1.25, 1,
@@ -63,18 +62,14 @@ calib <- matrix(c('par', 'lb', 'ub', 'x0', #THIS LIST WILL BE EDITED BUT START W
                   'ce', 0.0005, 0.002, 0.0013,
                   'ch', 0.0005, 0.002, 0.0013,
                   'cd', 0.0005, 0.002, 0.0013,
-                  'zone_heights', 0.1,9.5,5,
-                  'zone_heights', 0.1,9.5,9,
                   'rain_factor', 0.75, 1.25, 1,
                   'at_factor', 0.75, 1.25, 1,
                   'rh_factor', 0.75, 1.25, 1,
-                  'sed_temp_mean',3,20,11,
-                  'sed_temp_mean',3,20,17,
-                  'sed_temp_amplitude',2,12,6,
-                  'sed_temp_amplitude',2,12,6,
-                  'sed_temp_peak_doy',250,280,272,
-                  'sed_temp_peak_doy',250,280,272
-), nrow = 24,ncol = 4, byrow = TRUE) #EDIT THE NROW TO REFLECT # OF ROWS IN ANALYSIS
+                  'rain_threshold', 0.001, 0.1, 0.01,
+                  'runoff_coef', 0.01, 0.6, 0.3,
+                  'seepage_rate', 1e-8, 1e-2, 1e-5),
+                nrow = 19,ncol = 4, byrow = TRUE) #EDIT THE NROW TO REFLECT # OF ROWS IN ANALYSIS
+
 write.table(calib, file = paste0('sensitivity/sample_sensitivity_config_',var,'.csv'), row.names = FALSE, 
             col.names = FALSE, sep = ',',
             quote = FALSE)
@@ -84,14 +79,13 @@ x0 <- calib$x0
 lb <- calib$lb
 ub <- calib$ub
 pars <- calib$par
-obs <- read_field_obs('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv', var)
+obs <- read_field_obs('C:/Users/Owner/Desktop/NEON-GLM/observations/volume_barco.csv', var)
 nml_file = 'glm3.nml'
 run_sensitivity(var, max_r, x0, lb, ub, pars, obs, nml_file)
 
 
-
-
-var = 'temp'
+# calibrate the water volume based on the parameters that are most sensitive to the changes in volume
+var = 'Tot_V'
 calib <- read.csv(paste0('calibration_file_',var,'.csv'), stringsAsFactors = F)
 cal_pars = calib
 #Reload ub, lb for calibration
@@ -99,17 +93,30 @@ pars <- cal_pars$par
 ub <- cal_pars$ub
 lb <- cal_pars$lb
 #Create initial files
-#init.val <- rep(5, nrow(cal_pars))
-init.val <- (c(1,1,0.5, 0.0013,4,7,11,17,265,275) - lb) *10 /(ub-lb) # NEEDS TO BE UPDATED WITH STARTING VALUES FROM YOUR CALIBRATION FILE
-obs <- read_field_obs('field_data/CleanedObsTemp.csv', var)
+init.val <- (0.001 - lb) *10 /(ub-lb) # NEEDS TO BE UPDATED WITH STARTING VALUES FROM YOUR CALIBRATION FILE
+obs <- read_field_obs('C:/Users/Owner/Desktop/NEON-GLM/observations/volume_barco.csv', var)
 method = 'cmaes'
 calib.metric = 'RMSE'
 os = 'Compiled' #Changed from Unix
 target_fit = -Inf#1.55
 target_iter = 500 #1000*length(init.val)^2
 nml_file = 'glm3.nml'
-run_calibvalid(var, var_unit = 'degreesC', var_seq = seq(-5,35,1), cal_pars, pars, ub, lb, init.val, obs, method, 
+run_calibvalid(var, var_unit = 'm3', var_seq = seq(-5,35,1), cal_pars, pars, ub, lb, init.val, obs, method, 
                calib.metric, os, target_fit, target_iter, nml_file, flag = c()) #var_seq is contour color plot range
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #to visualize how params can converge

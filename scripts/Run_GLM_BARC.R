@@ -17,10 +17,6 @@ remotes::install_github("CareyLabVT/glmtools")
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, glmtools)
 
-#look at the .nml files to confirm the model run
-nml_file <- paste0("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC/glm3.nml")
-nml <- read_nml(nml_file) 
-print(nml)
 
 ##### run glm_aed #####
 glm_version()
