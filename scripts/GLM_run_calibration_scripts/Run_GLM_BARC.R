@@ -10,7 +10,7 @@
 
 # Get packages and specify sites to download
 # -----------------------------------------------------------------------------------------------------------------
-remotes::install_github("CareyLabVT/glmtools")
+remotes::install_github("hdugan/glmtools")
 
 #download.file("https://aquatic.science.uwa.edu.au/research/models/GLM/Download/downloader.php?bin&version=3.1/glm_3.1.0a4-0_amd64.deb.gz", destfile = "./glm_3.1.0a4-0_amd64.deb.gz")
 

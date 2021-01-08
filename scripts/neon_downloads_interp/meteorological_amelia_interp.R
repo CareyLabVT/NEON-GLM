@@ -82,6 +82,21 @@ BARC_met_final <- BARC_met_new %>%
 
 vis_miss(BARC_met_final, sort_miss = F) 
 
+jpeg("barc_met_interp.jpg", width = 1000, height = 1000)
+par(mfrow = c(2,2))
+plot(barc_rh_imputations$time, barc_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "barc RH Imputed")
+points(BARC_met$time, BARC_met$RelHum, cex = 0.7, pch = 19)
+
+plot(barc_at_imputations$time, barc_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "barc AT Imputed")
+points(BARC_met$time, BARC_met$AirTemp, cex = 0.7, pch = 19)
+
+plot(barc_lw_imputations$time, barc_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "barc LW Imputed")
+points(BARC_met$time, BARC_met$LongWave, cex = 0.7, pch = 19)
+
+plot(barc_sw_imputations$time, barc_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "barc SW Imputed")
+points(BARC_met$time, BARC_met$ShortWave, cex = 0.7, pch = 19)
+
+dev.off()
 
 # Fill in Missing SUGG data
 vis_miss(SUGG_met, sort_miss = F) 
@@ -147,6 +162,22 @@ SUGG_met_final <- SUGG_met_new %>%
 
 vis_miss(SUGG_met_final, sort_miss = F) 
 
+
+jpeg("SUGG_met_interp.jpg", width = 1000, height = 1000)
+par(mfrow = c(2,2))
+plot(sugg_rh_imputations$time, sugg_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "SUGG RH Imputed")
+points(SUGG_met$time, SUGG_met$RelHum, cex = 0.7, pch = 19)
+
+plot(sugg_at_imputations$time, sugg_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "SUGG AT Imputed")
+points(SUGG_met$time, SUGG_met$AirTemp, cex = 0.7, pch = 19)
+
+plot(sugg_lw_imputations$time, sugg_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "SUGG LW Imputed")
+points(SUGG_met$time, SUGG_met$LongWave, cex = 0.7, pch = 19)
+
+plot(sugg_sw_imputations$time, sugg_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "SUGG SW Imputed")
+points(SUGG_met$time, SUGG_met$ShortWave, cex = 0.7, pch = 19)
+
+dev.off()
 ##################################################################
 
 # Wisconsin Sites
@@ -219,6 +250,21 @@ CRAM_met_final <- CRAM_met_new %>%
 
 vis_miss(CRAM_met_final, sort_miss = F) 
 
+jpeg("CRAM_met_interp.jpg", width = 1000, height = 1000)
+par(mfrow = c(2,2))
+plot(cram_rh_imputations$time, cram_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "CRAM RH Imputed")
+points(CRAM_met$time, CRAM_met$RelHum, cex = 0.7, pch = 19)
+
+plot(cram_at_imputations$time, cram_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "CRAM AT Imputed")
+points(CRAM_met$time, CRAM_met$AirTemp, cex = 0.7, pch = 19)
+
+plot(cram_lw_imputations$time, cram_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "CRAM LW Imputed")
+points(CRAM_met$time, CRAM_met$LongWave, cex = 0.7, pch = 19)
+
+plot(cram_sw_imputations$time, cram_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "CRAM SW Imputed")
+points(CRAM_met$time, CRAM_met$ShortWave, cex = 0.7, pch = 19)
+
+dev.off()
 
 # Fill in Missing LITTLE ROCK LAKE data
 vis_miss(LIRO_met, sort_miss = F) 
@@ -287,6 +333,22 @@ LIRO_met_final <- LIRO_met_new %>%
 
 vis_miss(LIRO_met_final, sort_miss = F) 
 
+jpeg("liro_met_interp.jpg", width = 1000, height = 1000)
+par(mfrow = c(2,2))
+plot(liro_rh_imputations$time, liro_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "liro RH Imputed")
+points(LIRO_met$time, LIRO_met$RelHum, cex = 0.7, pch = 19)
+
+plot(liro_at_imputations$time, liro_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "liro AT Imputed")
+points(LIRO_met$time, LIRO_met$AirTemp, cex = 0.7, pch = 19)
+
+plot(liro_lw_imputations$time, liro_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "liro LW Imputed")
+points(LIRO_met$time, LIRO_met$LongWave, cex = 0.7, pch = 19)
+
+plot(liro_sw_imputations$time, liro_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "liro SW Imputed")
+points(LIRO_met$time, LIRO_met$ShortWave, cex = 0.7, pch = 19)
+
+dev.off()
+
 ##################################################################
 
 # Kansas Sites
@@ -319,17 +381,63 @@ prpo_rh_imputations <- bind_rows(unclass(prpo.amelia.rh$imputations), .id = "m")
 
 plot(prpo_rh_imputations$time, prpo_rh_imputations$RelHum)
 
-prpo_imputed <- left_join(liro_at_imputations, liro_rh_imputations, by = "time")
+#ShortWave
+plot(PRPO_met$time, PRPO_met$ShortWave)
+
+prpo.amelia.sw <- amelia(PRPO_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "ShortWave", leads = "ShortWave")
+prpo_sw_imputations <- bind_rows(unclass(prpo.amelia.sw$imputations), .id = "m") %>%
+  select(time, ShortWave)%>%
+  group_by(time)%>%
+  summarise_all(funs(mean))%>%
+  mutate(ShortWave = ifelse(ShortWave <= 0, 0, ShortWave))
+
+plot(prpo_sw_imputations$time, prpo_sw_imputations$ShortWave)
+
+#LongWave
+plot(PRPO_met$time, PRPO_met$LongWave)
+
+prpo.amelia.lw <- amelia(PRPO_met, m = 50, polytime = 2, ts = "time", cs = NULL, lags = "LongWave", leads = "LongWave")
+prpo_lw_imputations <- bind_rows(unclass(prpo.amelia.lw$imputations), .id = "m") %>%
+  select(time, LongWave)%>%
+  group_by(time)%>%
+  summarise_all(funs(mean))
+
+plot(prpo_lw_imputations$time, prpo_lw_imputations$LongWave)
+
+
+prpo_imputed <- left_join(prpo_sw_imputations, prpo_lw_imputations, by = "time")%>%
+  left_join(., prpo_at_imputations, by = "time")%>%
+  left_join(., prpo_rh_imputations, by = "time")
 
 PRPO_met_new <- left_join(PRPO_met, prpo_imputed, by = "time")
 
 PRPO_met_final <- PRPO_met_new %>%
+  mutate(ShortWave.x = ifelse(is.na(ShortWave.x), ShortWave.y, ShortWave.x))%>%
+  mutate(LongWave.x = ifelse(is.na(LongWave.x), LongWave.y, LongWave.x))%>%
   mutate(AirTemp.x = ifelse(is.na(AirTemp.x), AirTemp.y, AirTemp.x))%>%
   mutate(RelHum.x = ifelse(is.na(RelHum.x), RelHum.y, RelHum.x))%>%
-  select(time, ShortWave, LongWave, AirTemp.x, RelHum.x, WindSpeed, Rain)%>%
-  rename(ShortWave = ShortWave, LongWave = LongWave, AirTemp = AirTemp.x, RelHum = RelHum.x)
+  select(time, ShortWave.x, LongWave.x, AirTemp.x, RelHum.x, WindSpeed, Rain)%>%
+  rename(ShortWave = ShortWave.x, LongWave = LongWave.x, AirTemp = AirTemp.x, RelHum = RelHum.x)
 
-vis_miss(PRPO_met_final, sort_miss = F)
+vis_miss(PRPO_met_final, sort_miss = F) 
+
+
+jpeg("prpo_met_interp.jpg", width = 1000, height = 1000)
+par(mfrow = c(2,2))
+plot(prpo_rh_imputations$time, prpo_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "prpo RH Imputed")
+points(PRPO_met$time, PRPO_met$RelHum, cex = 0.7, pch = 19)
+
+plot(prpo_at_imputations$time, prpo_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "prpo AT Imputed")
+points(PRPO_met$time, PRPO_met$AirTemp, cex = 0.7, pch = 19)
+
+plot(prpo_lw_imputations$time, prpo_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "prpo LW Imputed")
+points(PRPO_met$time, PRPO_met$LongWave, cex = 0.7, pch = 19)
+
+plot(prpo_sw_imputations$time, prpo_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "prpo SW Imputed")
+points(PRPO_met$time, PRPO_met$ShortWave, cex = 0.7, pch = 19)
+
+dev.off()
+
 
 # Fill in Missing PRARIE LAKE data
 vis_miss(PRLA_met, sort_miss = F) 
@@ -397,6 +505,23 @@ PRLA_met_final <- LIRO_met_new %>%
   rename(ShortWave = ShortWave.x, LongWave = LongWave.x, AirTemp = AirTemp.x, RelHum = RelHum.x)
 
 vis_miss(PRLA_met_final, sort_miss = F) 
+
+jpeg("prla_met_interp.jpg", width = 1000, height = 1000)
+par(mfrow = c(2,2))
+plot(prla_rh_imputations$time, prla_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "prla RH Imputed")
+points(PRLA_met$time, PRLA_met$RelHum, cex = 0.7, pch = 19)
+
+plot(prla_at_imputations$time, prla_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "prla AT Imputed")
+points(PRLA_met$time, PRLA_met$AirTemp, cex = 0.7, pch = 19)
+
+plot(prla_lw_imputations$time, prla_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "prla LW Imputed")
+points(PRLA_met$time, PRLA_met$LongWave, cex = 0.7, pch = 19)
+
+plot(prla_sw_imputations$time, prla_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "prla SW Imputed")
+points(PRLA_met$time, PRLA_met$ShortWave, cex = 0.7, pch = 19)
+
+dev.off()
+
 ##################################################################
 
 # Alaska Site
@@ -465,6 +590,23 @@ TOOK_met_final <- TOOK_met_new %>%
   mutate(RelHum.x = ifelse(is.na(RelHum.x), RelHum.y, RelHum.x))%>%
   select(time, ShortWave.x, LongWave.x, AirTemp.x, RelHum.x, WindSpeed, Rain)%>%
   rename(ShortWave = ShortWave.x, LongWave = LongWave.x, AirTemp = AirTemp.x, RelHum = RelHum.x)
+
+jpeg("took_met_interp.jpg", width = 1000, height = 1000)
+par(mfrow = c(2,2))
+plot(took_rh_imputations$time, took_rh_imputations$RelHum, col = "red", pch = 19, cex = 0.5, main = "took RH Imputed")
+points(TOOK_met$time, TOOK_met$RelHum, cex = 0.7, pch = 19)
+
+plot(took_at_imputations$time, took_at_imputations$AirTemp, col = "red", pch = 19, cex = 0.5, main = "took AT Imputed")
+points(TOOK_met$time, TOOK_met$AirTemp, cex = 0.7, pch = 19)
+
+plot(took_lw_imputations$time, took_lw_imputations$LongWave, col = "red", pch = 19, cex = 0.5, main = "took LW Imputed")
+points(TOOK_met$time, TOOK_met$LongWave, cex = 0.7, pch = 19)
+
+plot(took_sw_imputations$time, took_sw_imputations$ShortWave, col = "red", pch = 19, cex = 0.5, main = "took SW Imputed")
+points(TOOK_met$time, TOOK_met$ShortWave, cex = 0.7, pch = 19)
+
+dev.off()
+
 ##################################################################
 
 
