@@ -49,12 +49,65 @@ secchi <- neonstore::neon_table(table = "dep_secchi-basic", site = lake_sites) %
 
 
 # Lake level in meters above sea level
+# ----------------------------------------------------------------------------------------
+
 water_level <- neonstore::neon_table(table = "EOS_30_min-expanded", site = lake_sites)%>%
   select(endDateTime,siteID,surfacewaterElevMean)%>%
   group_by(endDateTime)%>%
   arrange(siteID, endDateTime)%>%
   rename(value = surfacewaterElevMean)%>%
-  mutate(variable = "waterlevel")
+  mutate(variable = "waterlevel")%>%
+  mutate(Depth = "NA")
+
+
+# Build the observed water level data for each NEON site. 
+water_level_barc <- water_level %>% filter(siteID == "BARC") %>%
+  mutate(daily = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
+  group_by(daily)%>%
+  summarise_all(funs(mean), na.rm = T)%>%
+  select(-endDateTime)%>%
+  rename(DateTime = daily)%>%
+  arrange(DateTime)%>%
+  select(DateTime, value)%>%
+  mutate(surface_height = value-19.2)%>%
+  select(DateTime, surface_height)
+
+water_level_sugg <- water_level %>% filter(siteID == "SUGG") %>%
+  mutate(daily = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
+  group_by(daily)%>%
+  summarise_all(funs(mean), na.rm = T)%>%
+  select(-endDateTime)%>%
+  rename(DateTime = daily)%>%
+  arrange(DateTime)%>%
+  select(DateTime, value)%>%
+  mutate(surface_height = value-25.9)%>%
+  select(DateTime, surface_height)
+
+water_level_cram <- water_level %>% filter(siteID == "CRAM") %>%
+  mutate(daily = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
+  group_by(daily)%>%
+  summarise_all(funs(mean), na.rm = T)%>%
+  select(-endDateTime)%>%
+  rename(DateTime = daily)%>%
+  arrange(DateTime)%>%
+  select(DateTime, value)%>%
+  mutate(surface_height = value-25.8)%>%
+  select(DateTime, surface_height)
+
+
+
+
+water_level_barc <- water_level %>% filter(siteID == "BARC") %>%
+  mutate(daily = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
+  group_by(daily)%>%
+  summarise_all(funs(mean))%>%
+  select(-endDateTime)%>%
+  rename(DateTime = daily)%>%
+  arrange(DateTime)%>%
+  select(DateTime, value)%>%
+  mutate(surface_height = value-19.2)%>%
+  select(DateTime, surface_height)
+# ----------------------------------------------------------------------------------------
 
 
 
@@ -141,17 +194,7 @@ surface_sonde <- neonstore::neon_table(table = "waq_instantaneous-basic", site =
 
 
 
-# Build the observed water level data for each NEON site. 
-water_level_barc <- water_level %>% filter(siteID == "BARC") %>%
-  mutate(daily = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
-  group_by(daily)%>%
-  summarise_all(funs(mean))%>%
-  select(-endDateTime)%>%
-  rename(DateTime = daily)%>%
-  arrange(DateTime)%>%
-  select(DateTime, value)%>%
-  mutate(surface_height = value-19.2)%>%
-  select(DateTime, surface_height)
+
 
 
 water_temp_barc <- water_temp %>% filter(siteID == "BARC") %>%
