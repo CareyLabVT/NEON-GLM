@@ -30,7 +30,7 @@ print(nml)
 setwd("C:/Users/Owner/Desktop/NEON-GLM/GLM_BARC")
 system(paste0(sim_folder, "/GLM_BARC/glm.exe"))
 
-nc_file <- file.path(sim_folder, 'output/output.nc') #defines the output.nc file 
+nc_file <- file.path(sim_folder, 'GLM_BARC/output/output.nc') #defines the output.nc file 
 
 field_file<-file.path('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv')
 plot_temp_compare(nc_file, field_file)
@@ -48,11 +48,16 @@ temps_1 <- temps %>% filter(Depth == 1.05)
 plot(temps_1$DateTime, temps_1$Observed_temp, col = "black", main = " 1m Temperature Mod = red; Obs = black")
 points(temps_1$DateTime, temps_1$Modeled_temp, col = "red")
 
+water_height <- get_surface_height(file = nc_file)
 
+obs_water_height <- read_csv("C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_barco.csv")
+obs_water_height$DateTime <- ymd(obs_water_height$DateTime)
+obs_water_height$surface_height <- obs_water_height$surface_height-1
 
-#get water level
-water_level<-get_surface_height(nc_file, ice.rm = TRUE, snow.rm = TRUE)
-plot(water_level$DateTime,water_level$surface_height, ylim = c(5,9), main = "Barco!")
-lines(as.POSIXct(water_level_barc$DateTime),water_level_barc$surface_height, type = "p", ylim = c(5,9), col = "red")
-
+ggplot(water_height, aes(DateTime, surface_height)) +
+  geom_line() +
+  ggtitle('Surface water level') +
+  geom_point(data = obs_water_height, aes(as.POSIXct(DateTime), surface_height))+
+  xlab(label = '') + ylab(label = 'Water level (m)') +
+  theme_minimal()
 
