@@ -17,14 +17,29 @@ devtools::install_github("cboettig/neonstore", force = F)
 
 lake_sites = c("LIRO", "TOOK", "SUGG", "BARC", "PRPO", "PRLA", "CRAM")
 
-water_product = c("DP1.20267.001", "DP1.20261.001", "DP1.20042.001", "DP1.20163.001", "DP1.20252.001", 
-                  "DP1.20097.001","DP1.20093.001", "DP1.20033.001", "DP1.20288.001", "DP1.20016.001")
+water_product = c("DP1.20261.001", "DP1.20042.001", "DP1.20163.001", "DP1.20252.001", 
+                  "DP1.20097.001")
 
 # Download water products
 Sys.setenv("NEONSTORE_HOME" = "/groups/rqthomas_lab/neonstore")
-neonstore::neon_download(product = "DP1.20288.001", site = lake_sites)
 
-# Unpack the stored files to be accessible in R
+neonstore::neon_download(product = "DP1.20016.001", site = lake_sites) # --> Surface Elevation
+neonstore::neon_store(table = "EOS_30_min-expanded")
+
+neonstore::neon_download(product = "DP1.20267.001", site = lake_sites) # --> Gauge Height
+neonstore::neon_store(table = "gag_fieldData-basic")
+
+# Water Quality sonde Download is currently not working
+# neonstore::neon_download(product = "DP1.20288.001", site = lake_sites) # --> Water Quality
+# neonstore::neon_store(table = "waq_instantaneous-basic")
+
+neonstore::neon_download(product = "DP1.20033.001", site = lake_sites) # --> Nitrate S::CAN
+neonstore::neon_store(table = "NSW_15_minute-expanded")
+
+neonstore::neon_download(product = "DP1.20093.001", site = lake_sites) # --> Surface Water Quality
+neonstore::neon_store(table = "swc_externalLabDataByAnalyte-expanded")
+
+
 
 # This NEEDS TO BE RUN BEFORE RUNNING NEON_TABLE
 neonstore::neon_store(table = "dep_secchi-basic")
@@ -32,10 +47,9 @@ neonstore::neon_store(table = "sdg_externalLabData-expanded")
 neonstore::neon_store(table = "swc_externalLabDataByAnalyte-expanded")
 neonstore::neon_store(table = "alg_algaeExternalLabDataPerSample-expanded")
 neonstore::neon_store(table = "uPAR_30min-expanded")
-neonstore::neon_store(table = "NSW_15_minute-expanded")
-neonstore::neon_store(table = "waq_instantaneous-basic")
+
 neonstore::neon_store(table = "TSD_30_min-expanded")
-neonstore::neon_store(table = "EOS_30_min-expanded")
+
 
 ## Secchi depth
 secchi <- neonstore::neon_table(table = "dep_secchi-basic", site = lake_sites) %>%
@@ -46,19 +60,31 @@ secchi <- neonstore::neon_table(table = "dep_secchi-basic", site = lake_sites) %
   mutate(Depth = "NA")
 
 
-
-
 # Lake level in meters above sea level
 # ----------------------------------------------------------------------------------------
 
 water_level <- neonstore::neon_table(table = "EOS_30_min-expanded", site = lake_sites)%>%
   select(endDateTime,siteID,surfacewaterElevMean)%>%
-  group_by(endDateTime)%>%
-  arrange(siteID, endDateTime)%>%
-  rename(value = surfacewaterElevMean)%>%
+  mutate(daily = format(as.Date(endDateTime, "%Y-%m-%d"), "%Y-%m-%d"))%>%
+  group_by(daily, siteID)%>%
+  summarize(value = mean(surfacewaterElevMean, na.rm = TRUE)) %>%
+  arrange(siteID, daily)%>%
   mutate(variable = "waterlevel")%>%
-  mutate(Depth = "NA")
+  mutate(Depth = "NA")%>%
+  select(daily, siteID, value, variable, Depth)%>%
+  rename(DateTime = daily)%>%
+  mutate(value = ifelse(siteID == "BARC", value-20.2, value))%>%
+  mutate(value = ifelse(siteID == "SUGG", value-25.4, value))%>%
+  mutate(value = ifelse(siteID == "CRAM", value-492.1, value))%>%
+  mutate(value = ifelse(siteID == "LIRO", value-483, value))%>%
+  mutate(value = ifelse(siteID == "PRPO", value-587, value))%>%
+  mutate(value = ifelse(siteID == "PRLA", value-558, value))%>%
+  mutate(value = ifelse(siteID == "TOOK", value-688.8, value))
 
+water_level_plot <- ggplot(water_level, aes(DateTime, value, color = siteID))+
+  geom_point()+facet_wrap(~siteID, scales = "free_y")
+
+water_level_plot
 
 # Build the observed water level data for each NEON site. 
 water_level_barc <- water_level %>% filter(siteID == "BARC") %>%
