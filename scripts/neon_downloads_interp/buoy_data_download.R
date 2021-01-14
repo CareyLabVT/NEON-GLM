@@ -41,6 +41,8 @@ neonstore::neon_store(table = "swc_externalLabDataByAnalyte-expanded")
 
 
 
+
+
 # This NEEDS TO BE RUN BEFORE RUNNING NEON_TABLE
 neonstore::neon_store(table = "dep_secchi-basic")
 neonstore::neon_store(table = "sdg_externalLabData-expanded")
@@ -85,6 +87,8 @@ water_level_plot <- ggplot(water_level, aes(DateTime, value, color = siteID))+
   geom_point()+facet_wrap(~siteID, scales = "free_y")
 
 water_level_plot
+
+write_csv(water_level, "./observations/water_level_NEON_sites.csv")
 
 # Build the observed water level data for each NEON site. 
 water_level_barc <- water_level %>% filter(siteID == "BARC") %>%
