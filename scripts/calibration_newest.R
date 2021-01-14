@@ -10,7 +10,7 @@
 
 rm(list = ls()) #let's clean up that workspace!
 
-remotes::install_github("CareyLabVT/glmtools")
+#remotes::install_github("CareyLabVT/glmtools")
 
 if (!require('pacman')) install.packages('pacman'); library('pacman')
 pacman::p_load(tidyverse, lubridate, reshape2, devtools, patchwork, zoo, ncdf4, glmtools, GLM3r, adagio) # --> Load the packages
@@ -29,8 +29,11 @@ sim_folder <- getwd()                                   # --> Set the simulation
 out_file <- file.path(sim_folder, "output","output.nc") # --> Set the glm aed output location
 file.copy(glm_template, 'glm3.nml', overwrite = TRUE)
 nml_file <- file.path(sim_folder, 'glm3.nml')
+
+
 field_temp<-file.path('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv')
 field_volume <- "C:/Users/Owner/Desktop/NEON-GLM/observations/volume_barco.csv"
+
 # read example configuration into memory
 eg_nml <- read_nml(nml_file = file.path(sim_folder,'glm3.nml'))
 
@@ -44,6 +47,15 @@ temp_rmse <- compare_to_field(nc_file = out_file,
                               precision= 'hours')
 
 print(paste('Total time period (uncalibrated):',round(temp_rmse,2),'deg C RMSE'))
+
+
+volume <- get_var(var = 'Tot_V', file = out_file)
+plot(volume)
+
+
+glm_template = 'glm3-template.nml' 
+file.copy(glm_template, 'glm3.nml', overwrite = TRUE)
+nml_file <- file.path(sim_folder, 'glm3.nml')
 
 var = 'Tot_V'         # variable to which we apply the calibration procedure
 var_name = 'Tot_V'
@@ -68,9 +80,9 @@ scaling = TRUE       # scaling of the variables in a space of [0,10]; TRUE for C
 verbose = TRUE
 method = 'CMA-ES'    # optimization method, choose either `CMA-ES` or `Nelder-Mead`
 metric = 'RMSE'      # objective function to be minimized, here the root-mean square error
-target.fit = 1000     # refers to a target fit of 2.0 degrees Celsius (stops when RMSE is below that)
-target.iter = 20    # refers to a maximum run of 20 calibration iterations (stops after that many runs)
-plotting = TRUE      # if TRUE, script will automatically save the contour plots
+target.fit = 1000     # refers to a target fit of 1000 cubic meters 
+target.iter = 20    
+plotting = F      # if TRUE, script will automatically save the contour plots
 output = out_file    # path of the output file
 field_file = field_volume # path of the field data
 conversion.factor = 1 # conversion factor for the output, e.g. 1 for water temp.
@@ -82,8 +94,8 @@ calibrate_sim(var = 'Tot_V', path = getwd(),
               glmcmd = NULL, first.attempt = TRUE, 
               period = period, 
               scaling = TRUE, method = 'CMA-ES', metric = 'RMSE', 
-              target.fit = 2.0, target.iter = 20, 
-              plotting = TRUE, 
+              target.fit = 1000, target.iter = 1000, 
+              plotting = F, 
               output = output, 
               verbose = TRUE)
 
@@ -92,7 +104,10 @@ GLM3r::run_glm(sim_folder, verbose = T)
 
 water_height <- get_surface_height(file = out_file)
 
-obs_water_height <- read_csv("C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_barco.csv")
+obs_water_height <- read_csv("C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_NEON_sites.csv")
+ggplot(obs_water_height, aes(DateTime, value, color = siteID))+
+  geom_point()+facet_wrap(~siteID, scales = "free_y")
+
 obs_water_height$DateTime <- ymd(obs_water_height$DateTime)
 
 
