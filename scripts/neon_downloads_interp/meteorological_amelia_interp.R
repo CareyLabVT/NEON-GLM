@@ -266,6 +266,7 @@ points(CRAM_met$time, CRAM_met$ShortWave, cex = 0.7, pch = 19)
 
 dev.off()
 
+write_csv(CRAM_met_final, "CRAM_met_final.csv")
 # Fill in Missing LITTLE ROCK LAKE data
 vis_miss(LIRO_met, sort_miss = F) 
 

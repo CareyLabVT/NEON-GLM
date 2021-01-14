@@ -34,4 +34,6 @@ cram_lake_volume <- water_level %>% filter(siteID == "CRAM")%>%
   mutate(value = value*195441 - 2315254)%>%
   mutate(variable = "watervolume")
 
+plot(cram_lake_volume$value)
+
 write_csv(cram_lake_volume, "./observations/volume_crampton.csv")
