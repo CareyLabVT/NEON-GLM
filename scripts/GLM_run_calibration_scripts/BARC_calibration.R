@@ -30,11 +30,12 @@ plot_var(file=out,"Tot_V",reference="surface")
 # GET FIELD DATA FOR CALIBRATION AND VALIDATION  ---------------------------
 # WTR | VOLUME | SURFACE HEIGHT DATA
 
-field_temp<-read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv', header=T)
+field_temp <- read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/CleanedObsTempBARC.csv', header=T)
 
 field_surface_height <- read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_barco.csv', header=T)
 
 field_volume<- read.csv('C:/Users/Owner/Desktop/NEON-GLM/observations/volume_barco.csv', header=T)
+
 field_volume <- field_volume %>% mutate(Depth = NA) %>%
   select(DateTime, Depth, Tot_V)
 write.csv(field_volume, 'volume_barco.csv')
