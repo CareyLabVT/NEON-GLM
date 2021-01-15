@@ -91,7 +91,7 @@ temp_rmse <- compare_to_field(nc_file = out_file,
                               precision= 'hours')
 
 print(paste('Total time period (calibrated):',round(temp_rmse,2),'deg C RMSE'))
-plot_temp(out_file)
+plot_temp_compare(out_file, field_temp)
 
 
 ice <- get_ice(out_file)
