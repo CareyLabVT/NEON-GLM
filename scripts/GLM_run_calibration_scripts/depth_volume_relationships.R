@@ -37,3 +37,26 @@ cram_lake_volume <- water_level %>% filter(siteID == "CRAM")%>%
 plot(cram_lake_volume$value)
 
 write_csv(cram_lake_volume, "./observations/volume_crampton.csv")
+
+
+
+#### Little Rock Volume #### 
+liro_hypso <- read_csv("/groups/rqthomas_lab/neonstore/lake_bathymetry/LIRO/D05LIRO_BATH_20160929_volume.csv")
+liro_hypso$Depth <- -liro_hypso$Depth
+liro_hypso$Volume <- rev(liro_hypso$Volume)
+
+liro_hypso <- liro_hypso %>% filter(Depth >= 14)
+
+plot(liro_hypso$Volume, liro_hypso$Depth)
+
+vol_model <- lm(Volume~Depth, data = cram_hypso)
+summary(vol_model)
+
+cram_lake_volume <- water_level %>% filter(siteID == "CRAM")%>%
+  mutate(value = value - 1)%>%
+  mutate(value = value*195441 - 2315254)%>%
+  mutate(variable = "watervolume")
+
+plot(cram_lake_volume$value)
+
+write_csv(cram_lake_volume, "./observations/volume_crampton.csv")

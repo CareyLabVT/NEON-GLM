@@ -329,10 +329,14 @@ LIRO_met_final <- LIRO_met_new %>%
   mutate(LongWave.x = ifelse(is.na(LongWave.x), LongWave.y, LongWave.x))%>%
   mutate(AirTemp.x = ifelse(is.na(AirTemp.x), AirTemp.y, AirTemp.x))%>%
   mutate(RelHum.x = ifelse(is.na(RelHum.x), RelHum.y, RelHum.x))%>%
+  mutate(Rain = Rain/41.77/86400)%>%
   select(time, ShortWave.x, LongWave.x, AirTemp.x, RelHum.x, WindSpeed, Rain)%>%
   rename(ShortWave = ShortWave.x, LongWave = LongWave.x, AirTemp = AirTemp.x, RelHum = RelHum.x)
 
-vis_miss(LIRO_met_final, sort_miss = F) 
+vis_miss(LIRO_met_final, sort_miss = F)
+LIRO_met_final <- LIRO_met_final%>%mutate(Rain = Rain*0.024/24)
+
+write_csv(LIRO_met_final, "./GLM_LIRO/LIRO_met_final.csv")
 
 jpeg("liro_met_interp.jpg", width = 1000, height = 1000)
 par(mfrow = c(2,2))
