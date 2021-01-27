@@ -149,12 +149,21 @@ GLM3r::run_glm(sim_folder, verbose = T)
 
 water_height <- get_surface_height(file = out_file)
 
-obs_water_height <- read_csv("C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_NEON_sites.csv")
+height <- get_var(file = out_file, "NS")
+
+elev <- get_var(file = out_file, "z")
+
+ncin <- nc_open(out_file)
+watdep <- ncvar_get(ncin, "z")
+
+
+obs_water_height <- read_csv("C:/Users/Owner/Desktop/NEON-GLM/observations/water_level_NEON_sites.csv")%>%
+  filter(siteID == "BARC")
+
 ggplot(obs_water_height, aes(DateTime, value, color = siteID))+
   geom_point()+facet_wrap(~siteID, scales = "free_y")
 
 obs_water_height$DateTime <- ymd(obs_water_height$DateTime)
-
 
 ggplot(water_height, aes(DateTime, surface_height)) +
   geom_line() +
